@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent } from "../../../../components/ui/card";
 
-export const DivSection = (): JSX.Element => {
+export const LeadershipSection = (): JSX.Element => {
   const founders = [
     {
       name: "Alexander Crown",

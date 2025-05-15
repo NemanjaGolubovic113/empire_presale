@@ -9,7 +9,7 @@ import React from "react";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent } from "../../../../components/ui/card";
 
-export const ContainerWrapperSection = (): JSX.Element => {
+export const VisionSection = (): JSX.Element => {
   // Benefits data for mapping
   const eliteBenefits = [
     "Free access to 1,700+ airport lounges worldwide",

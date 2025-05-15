@@ -5,6 +5,7 @@ import { ToastContainer } from "react-toastify";
 import { WalletProviders } from "./contexts/WalletContext";
 import ContractContextProvider from "./contexts/ContractContext";
 import { TokenPage } from "./pages/token";
+import { Empire } from "./pages/empire";
 
 createRoot(document.getElementById("app") as HTMLElement).render(
     <>
@@ -14,7 +15,8 @@ createRoot(document.getElementById("app") as HTMLElement).render(
                     <BrowserRouter>
                     <Routes>
                         {/* <Route path="/" element={<UnderDevelopment />} /> */}
-                        <Route path="/" element={<TokenPage />} />
+                        <Route path="/" element={<Empire />} />
+                        <Route path="/token" element={<TokenPage />} />
                     </Routes>
                     </BrowserRouter>
                 </StrictMode>

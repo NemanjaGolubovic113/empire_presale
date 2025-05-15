@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "../../../../components/ui/button";
 
-export const SectionComponentNode = (): JSX.Element => {
+export const FutureSection = (): JSX.Element => {
   return (
     <section className="flex flex-col items-center px-4 md:px-0 py-12 md:py-24 bg-[#040510] w-full relative">
       <div className="h-[431px] [background:linear-gradient(180deg,rgba(4,5,16,0.9)_0%,rgba(4,5,16,0.7)_100%)] absolute w-full top-0 left-0" />

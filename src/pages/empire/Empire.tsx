@@ -1,13 +1,13 @@
 import React from "react";
 import { BackgroundSection } from "./sections/BackgroundSection/BackgroundSection";
-import { ContainerWrapperSection } from "./sections/CointainerWrapperSection";
-import { DivSection } from "./sections/DivSection";
+import { VisionSection } from "./sections/VisionSection";
+import { LeadershipSection } from "./sections/LeadershipSection";
 import { DivWrapperSection } from "./sections/DivWrapperSection";
 import { FooterSection } from "./sections/FooterSection";
 import { HeaderSection } from "./sections/HeaderSection/HeaderSection";
-import { Section } from "./sections/Section";
-import { SectionComponentNode } from "./sections/SectionComponentNode";
-import { SectionWrapper } from "./sections/SectionWrapper";
+import { OverviewSection } from "./sections/OverviewSection";
+import { FutureSection } from "./sections/FutureSection";
+import { MembershipSection } from "./sections/MembershipSection";
 
 export const Empire = (): JSX.Element => {
   // Scrolling text content for the banner
@@ -22,8 +22,8 @@ export const Empire = (): JSX.Element => {
       <div className="relative w-full">
         <BackgroundSection />
 
-        <section id="home">
-          <Section />
+        <section id="overview">
+          <OverviewSection />
         </section>
 
         {/* Scrolling text banner */}
@@ -35,22 +35,22 @@ export const Empire = (): JSX.Element => {
           </div>
         </div>
 
-        <section id="manifesto">
-          <ContainerWrapperSection />
+        <section id="vision">
+          <VisionSection />
         </section>
 
-        <section id="emperor-pass">
-          <SectionWrapper />
+        <section id="membership">
+          <MembershipSection />
         </section>
 
         <DivWrapperSection />
 
-        <section id="founders">
-          <DivSection />
+        <section id="leadership">
+          <LeadershipSection />
         </section>
 
-        <section id="roadmap">
-          <SectionComponentNode />
+        <section id="future">
+          <FutureSection />
         </section>
       </div>
 

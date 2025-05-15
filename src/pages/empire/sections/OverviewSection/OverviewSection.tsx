@@ -2,12 +2,12 @@ import React from "react";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent } from "../../../../components/ui/card";
 
-export const Section = (): JSX.Element => {
+export const OverviewSection = (): JSX.Element => {
   return (
     <section className="relative w-full min-h-screen md:h-[1200px] flex items-center justify-center px-4 md:px-0">
       {/* Background image with overlay */}
       <div className="absolute inset-0 bg-[url(..//section.png)] bg-cover bg-center" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[rgba(4,5,16,0.7)] to-[rgba(4,5,16,0.9)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[rgba(4,5,16,0.3)] to-[rgba(4,5,16,0.7)]" />
 
       {/* Content container */}
       <Card className="relative max-w-[800px] border-none bg-transparent">
