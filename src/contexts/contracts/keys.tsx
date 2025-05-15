@@ -1,0 +1,69 @@
+import { PublicKey } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID, 
+    ASSOCIATED_TOKEN_PROGRAM_ID
+} from '@solana/spl-token';
+import { PRESALE_PROGRAM_ID, 
+    MAINSTATE_PREFIX_SEED, 
+    POOLSTATE_PREFIX_SEED,
+    USER_INFO_SEED,
+    VAULT_SEED
+} from './constants';
+
+
+const asyncGetPda = async (seeds: Array<Buffer | Uint8Array>, programId: PublicKey) => {
+    const [pubKey, bump] = PublicKey.findProgramAddressSync(seeds, programId);
+    return [pubKey, bump];
+};
+
+export const getMainStateKey = async () => {
+    const [mainStateKey] = await asyncGetPda([Buffer.from(MAINSTATE_PREFIX_SEED)], 
+        PRESALE_PROGRAM_ID
+    );
+    return mainStateKey;
+};
+
+export const getPoolStateKey = async (baseMint: PublicKey, quoteMint: PublicKey) => {
+    const [poolStateKey] = await asyncGetPda(
+        [
+            Buffer.from(POOLSTATE_PREFIX_SEED), 
+            baseMint.toBuffer(), 
+        ], 
+        PRESALE_PROGRAM_ID
+    );
+    return poolStateKey;
+};
+
+export const getUserInfoKey = async (poolKey: PublicKey, buyerKey: PublicKey) => {
+    const [userInfoKey] = await asyncGetPda(
+        [
+            Buffer.from(USER_INFO_SEED),
+            poolKey.toBuffer(),
+            buyerKey.toBuffer(),
+        ],
+        PRESALE_PROGRAM_ID
+    );
+    return userInfoKey;
+}
+
+export const getVaultKey = async (poolKey: PublicKey) => {
+    const [userInfoKey] = await asyncGetPda(
+        [
+            Buffer.from(VAULT_SEED),
+            poolKey.toBuffer(),
+        ],
+        PRESALE_PROGRAM_ID
+    );
+    return userInfoKey;
+}
+
+export const getAssociatedTokenAccountKey = async (ownerPubkey: PublicKey, tokenMint: PublicKey) => {
+    let associatedTokenAccountKey = PublicKey.findProgramAddressSync(
+        [
+            ownerPubkey.toBuffer(), 
+            TOKEN_PROGRAM_ID.toBuffer(), 
+            tokenMint.toBuffer()
+        ], 
+        ASSOCIATED_TOKEN_PROGRAM_ID
+    )[0];
+    return associatedTokenAccountKey;
+};
