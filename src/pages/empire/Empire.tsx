@@ -27,10 +27,17 @@ export const Empire = (): JSX.Element => {
         </section>
 
         {/* Scrolling text banner */}
-        <div className="flex flex-col w-full items-start py-4 md:py-[33px] bg-[#040510] border-t border-b border-[#141625] overflow-hidden">
+        {/* <div className="flex flex-col w-full items-start py-4 md:py-[33px] bg-[#040510] border-t border-b border-[#141625] overflow-hidden">
           <div className="flex flex-col items-start relative self-stretch w-full">
             <div className="relative w-[3482px] mt-[-1.00px] mr-[-1562.00px] [font-family:'Arial-Bold',Helvetica] font-bold text-[#a3ff12] text-xl md:text-[40px] tracking-[0] leading-[32px] md:leading-[64px]">
               {repeatedText}
+            </div>
+          </div>
+        </div> */}
+        <div className="flex flex-col w-full items-start py-4 md:py-[33px] bg-[#040510] border-t border-b border-[#141625] overflow-hidden">
+          <div className="relative w-full whitespace-nowrap">
+            <div className="inline-block animate-marquee [font-family:'Arial-Bold',Helvetica] font-bold text-[#a3ff12] text-xl md:text-[40px] leading-[32px] md:leading-[64px]">
+              {repeatedText} {repeatedText}
             </div>
           </div>
         </div>

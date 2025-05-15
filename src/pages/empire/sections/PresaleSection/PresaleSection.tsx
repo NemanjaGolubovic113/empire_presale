@@ -9,7 +9,7 @@ import React from "react";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent } from "../../../../components/ui/card";
 
-export const MembershipSection = (): JSX.Element => {
+export const PresaleSection = (): JSX.Element => {
   // Benefits data for mapping
   const eliteBenefits = [
     "Free access to 1,700+ airport lounges worldwide",
@@ -39,7 +39,7 @@ export const MembershipSection = (): JSX.Element => {
             WebkitTextFillColor: "transparent"
           }}
         >
-          EMPEROR PASS
+          Presale Live
         </h2>
 
         <div className="flex flex-col max-w-[800px] w-full mx-auto mt-16">

@@ -33,7 +33,14 @@ export const LeadershipSection = (): JSX.Element => {
       <div className="relative mx-auto max-w-[1200px] w-full">
         {/* Section header */}
         <div className="flex flex-col items-center mb-16">
-          <h2 className="[background:linear-gradient(90deg,rgba(163,255,18,1)_0%,rgba(197,255,107,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'Arial-Bold',Helvetica] font-bold text-transparent text-[40px] text-center leading-[48px]">
+          <h2
+            className="[background:linear-gradient(90deg,rgba(163,255,18,1)_0%,rgba(197,255,107,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'Arial-Bold',Helvetica] font-bold text-transparent text-[40px] text-center leading-[48px]"
+            style={{
+              WebkitBackgroundClip: "text",
+              backgroundClip: "text",
+              WebkitTextFillColor: "transparent"
+            }}
+          >
             THE FOUNDERS
           </h2>
           <p className="mt-4 [font-family:'Arial-Narrow',Helvetica] font-normal text-gray-400 text-[17.6px] text-center leading-[28.2px] max-w-[655px]">

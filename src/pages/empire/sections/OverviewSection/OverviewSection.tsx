@@ -7,7 +7,7 @@ export const OverviewSection = (): JSX.Element => {
     <section className="relative w-full min-h-screen md:h-[1200px] flex items-center justify-center px-4 md:px-0">
       {/* Background image with overlay */}
       <div className="absolute inset-0 bg-[url(..//section.png)] bg-cover bg-center" />
-      <div className="absolute inset-0 bg-gradient-to-b from-[rgba(4,5,16,0.3)] to-[rgba(4,5,16,0.7)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[rgba(4,5,16,0.3)] to-[rgba(4,5,16,0.6)]" />
 
       {/* Content container */}
       <Card className="relative max-w-[800px] border-none bg-transparent">
@@ -15,6 +15,7 @@ export const OverviewSection = (): JSX.Element => {
           {/* Icon placeholder */}
           <div className="w-[72px] h-16 text-[#a3ff12] text-[64px] text-center leading-[64px] font-normal tracking-[0] whitespace-nowrap mb-11">
             {/* Icon content */}
+            <img src="/king.svg" alt="king" />
           </div>
 
           {/* Main heading with gradient */}

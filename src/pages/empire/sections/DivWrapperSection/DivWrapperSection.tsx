@@ -7,20 +7,11 @@ export const DivWrapperSection = (): JSX.Element => {
   const cards = [
     {
       title: "The Empire Is Open",
-      subtitle: "WE DON'T HAVE FANS",
-      description: [
-        "WE HAVE CITIZENS. WE'RE NOT LAUNCHING A TOKEN.",
-        "WE'RE BUILDING SOMETHING BIGGER THAN HYPE. ONE",
-        "COIN. ONE PEOPLE. ONE EMPIRE.",
-      ],
+      description: "We don't have fans - we have citizens. Join the creators, traders, and believers building something bigger than hype.",
     },
     {
       title: "Real-World Empire",
-      description: [
-        "From Dubai to Europe and USA— this is more than digital. It's",
-        "your key to elite events, exclusive access, and real-world utility",
-        "that extends beyond the blockchain.",
-      ],
+      description: "From Dubai to Europe and Asia - this is more than digital. It’s your key to elite events, crypto culture, and lifelong access.",
     },
   ];
 
@@ -36,24 +27,13 @@ export const DivWrapperSection = (): JSX.Element => {
               {card.title}
             </h2>
 
-            {card.subtitle && (
-              <p className="mt-4 md:mt-5 [font-family:'Arial-Narrow',Helvetica] font-normal text-gray-500 text-sm text-center tracking-[0] leading-[22.4px]">
-                {card.subtitle}
-              </p>
-            )}
-
             <div className="mt-4 [font-family:'Arial-Narrow',Helvetica] font-normal text-gray-300 text-sm md:text-base text-center tracking-[0] leading-[25.6px]">
-              {card.description.map((line, i) => (
-                <React.Fragment key={i}>
-                  {line}
-                  {i < card.description.length - 1 && <br />}
-                </React.Fragment>
-              ))}
+              {card.description}
             </div>
 
             <div className="flex mt-8 md:mt-10 mb-8 md:mb-10 gap-1">
               {[...Array(5)].map((_, i) => (
-                <StarIcon key={i} className="text-[#ffc107] w-5 h-5 md:w-6 md:h-6" />
+                <StarIcon key={i} className="text-[#ffc107] w-5 h-5 md:w-6 md:h-6 fill-current" />
               ))}
             </div>
           </CardContent>

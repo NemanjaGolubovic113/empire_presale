@@ -42,7 +42,9 @@ export const HeaderSection = (): JSX.Element => {
       <div className="flex max-w-[1200px] w-full items-center justify-between px-4 md:px-5">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="text-[#a3ff12] text-xl md:text-2xl leading-6 [font-family:'Font_Awesome_5_Free-Solid',Helvetica] font-normal"></div>
+          <div className="text-[#a3ff12] text-xl md:text-2xl leading-6 [font-family:'Font_Awesome_5_Free-Solid',Helvetica] font-normal">
+            <img src="/king.svg" alt="king" height={24} width={24} />
+          </div>
           <div className="[font-family:'Arial-Bold',Helvetica] font-bold text-white text-lg md:text-xl leading-8">
             The Empire
           </div>
