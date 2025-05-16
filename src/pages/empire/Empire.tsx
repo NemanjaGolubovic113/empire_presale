@@ -8,6 +8,7 @@ import { HeaderSection } from "./sections/HeaderSection/HeaderSection";
 import { OverviewSection } from "./sections/OverviewSection";
 import { FutureSection } from "./sections/FutureSection";
 import { MembershipSection } from "./sections/MembershipSection";
+import { PresaleSection } from "./sections/PresaleSection";
 
 export const Empire = (): JSX.Element => {
   // Scrolling text content for the banner
@@ -51,6 +52,10 @@ export const Empire = (): JSX.Element => {
         </section>
 
         <DivWrapperSection />
+
+        <section id="presale">
+          <PresaleSection />
+        </section>
 
         <section id="leadership">
           <LeadershipSection />

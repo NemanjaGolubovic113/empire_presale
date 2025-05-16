@@ -13,7 +13,9 @@ import {
     contract_updateMainStateInfo, 
     contract_isPoolComplete,
     contract_claimTx,
-    contract_withdraw2Tx
+    contract_withdraw2Tx,
+
+    contract_createPresale
 } from './contracts';
 
 
@@ -32,6 +34,15 @@ interface ContractContextType {
     isPoolComplete: (baseToken: string, quoteMint: PublicKey) => Promise<boolean>;
     getClaimTx: (baseToken: string) => Promise<any>;
     getWithdraw2Tx: (baseToken: string) => Promise<any>;
+
+    createPresale: (
+        hardcapAmount: number,
+        pricePerToken: number,
+        pricePerTokenNext: number,
+        startTime: number,
+        endTime: number,
+        claimTime: number
+    ) => Promise<any>;
 }
 
 export const ContractContext = createContext<ContractContextType | null>(null);
@@ -214,6 +225,38 @@ const ContractContextProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return tx;
     }
 
+
+
+
+    const createPresale = async (
+        hardcapAmount: number,
+        pricePerToken: number,
+        pricePerTokenNext: number,
+        startTime: number,
+        endTime: number,
+        claimTime: number
+    ) => {
+
+        try {
+            await contract_createPresale(
+                walletCtx,
+                hardcapAmount,
+                pricePerToken,
+                pricePerTokenNext,
+                startTime,
+                endTime,
+                claimTime
+            );
+        } catch (err) {
+            console.error(err);
+            if (err instanceof Error) {
+                throw new Error(err.message);
+            } else {
+                throw new Error(String(err));
+            }
+        }
+    };
+
     const context = {
         getTradingFee,
         getOwnerAddress, 
@@ -228,7 +271,10 @@ const ContractContextProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         updateMainStateInfo, 
         isPoolComplete,
         getClaimTx,
-        getWithdraw2Tx
+        getWithdraw2Tx,
+
+
+        createPresale
     };
 
     return <ContractContext.Provider value={context}>{children}</ContractContext.Provider>

@@ -8,17 +8,57 @@ import {
 import React from "react";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent } from "../../../../components/ui/card";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
+import { LAMPORTS_PER_SOL, Transaction, PublicKey } from '@solana/web3.js'
+import { NATIVE_MINT } from '@solana/spl-token'
+import {
+  Token,
+  TokenAmount,
+  TOKEN_PROGRAM_ID
+} from "@raydium-io/raydium-sdk";
+import { toast } from "react-toastify";
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
+import ProgressBar from "../../../../components/ui/progressbar";
+import { useContract } from "../../../../contexts/ContractContext";
+import { Header } from "../../../../components/Header";
+import { TOKEN_DECIMALS } from "../../../../engine/consts";
+import { send } from "../../../../engine/utils";
+import { connection } from "../../../../engine/config";
+import { FEE_PRE_DIV } from "../../../../contexts/contracts/constants";
+import TokenCalculator from "../../../../components/ui/TokenCalculator";
+import TokenPrice from "../../../../components/ui/TokenPrice";
+import PresaleProgress from "../../../../components/ui/PresaleProgress";
+import PaymentOptions from "../../../../components/ui/PaymentOptions";
+
+const TokenIcon = () => (
+  <span className="text-yellow-300 font-bold flex items-center justify-center w-6 h-6">
+    $
+  </span>
+);
+interface ContractContextType {
+  isPoolCreated: (baseToken: string, quoteMint: PublicKey) => Promise<any>;
+  getUserInfo: (baseToken: string) => Promise<any>;
+  getBuyTx: (token: string, amount: number, infAddr: string, infBenefit: number, userBenefit: number) => Promise<any>;
+  getSellTx: (token: string, amount: number) => Promise<any>;
+  isPoolComplete: (baseToken: string, quoteMint: PublicKey) => Promise<boolean>;
+  getClaimTx: (baseToken: string) => Promise<any>;
+  getWithdraw2Tx: (baseToken: string) => Promise<any>;
+  getTradingFee: () => Promise<any>;
+
+
+  createPresale: (
+        hardcapAmount: number,
+        pricePerToken: number,
+        pricePerTokenNext: number,
+        startTime: number,
+        endTime: number,
+        claimTime: number
+    ) => Promise<any>;
+}
 
 export const PresaleSection = (): JSX.Element => {
-  // Benefits data for mapping
-  const eliteBenefits = [
-    "Free access to 1,700+ airport lounges worldwide",
-    "Fully paid invites to global meetups — starting in Dubai",
-    "Voting power on major project decisions",
-    "Priority access to all future launches and drops",
-    "Elevated status within the Empire community",
-  ];
-
   // Social icons for the NFT card
   const socialIcons = [
     <div className="text-[#a3ff12]">
@@ -27,6 +67,134 @@ export const PresaleSection = (): JSX.Element => {
     <img src="globalcommunity.svg" alt="globalcommunity" width={16} height={16} />,
     <img src="realworldutility.svg" alt="realworldutility" width={16} height={16} />
   ];
+  const location = useLocation();
+  const addr = location.pathname.split("/")[2];
+
+  const walletCtx = useAnchorWallet();
+  const { isPoolComplete: isPoolCompleted, getUserInfo, isPoolCreated, getTradingFee } = useContract() as ContractContextType;
+
+  const [isTradeDialogOpen, setIsTradeDialogOpen] = useState(false)
+  const [amount, setAmount] = useState<string | ''>('');
+  const [currentCoin, setCurrentCoin] = useState('sol')
+  const [isPoolComplete, setIsPoolComplete] = useState(false)
+  const [created, setIsPoolCreated] = useState(null)
+  const [tradingFee, setTradingFee] = useState<number | null>(null)
+  const [tokenResult, setTokenResult] = useState<JSX.Element | null>(null);
+  const [couponResult, setCouponResult] = useState<JSX.Element | null>(null);
+  const [payAmount, setPayAmount] = useState<string>('1');
+  const [receiveAmount, setReceiveAmount] = useState<string>('1.5');
+
+  const [selectedPayment, setSelectedPayment] = useState('sol');
+  
+  const paymentOptions = [
+    { 
+      id: 'sol', 
+      name: 'SOL',
+      icon: <img src="/sol.png" alt="SOL" className="w-6 h-6 rounded-full" />
+    },
+    { 
+      id: 'usdt', 
+      name: 'USDT',
+      icon: <img src="/usdt.webp" alt="USDT" className="w-6 h-6" />
+    },
+    { 
+      id: 'usdc', 
+      name: 'USDC',
+      icon: <img src="/usdc.webp" alt="USDC" className="w-6 h-6" />
+    },
+    { 
+      id: 'card', 
+      name: 'CARD',
+      icon: <img src="/card.png" alt="CARD" className="w-6 h-6" />
+    }
+  ];
+
+
+  const handlePayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setPayAmount(value);
+      if (value) {
+        const amount = parseFloat(value)/* * exchangeRate*/;
+        setReceiveAmount(amount.toString());
+      } else {
+        setReceiveAmount('');
+      }
+    }
+  };
+
+  const getPaymentDetails = () => {
+    switch (selectedPayment) {
+      case 'sol':
+        return {
+          symbol: 'SOL',
+          exchangeRate: 13.21 // 1 SOL = 13.21 $EMP
+        };
+      case 'usdt':
+        return {
+          symbol: 'USDT',
+          exchangeRate: 13.21 // Assuming same rate for demo
+        };
+      case 'card':
+        return {
+          symbol: 'USD',
+          exchangeRate: 13.21 // Assuming same rate for demo
+        };
+      default:
+        return {
+          symbol: 'SOL',
+          exchangeRate: 13.21
+        };
+    }
+  };
+
+  const payment = getPaymentDetails();
+
+
+  useEffect(() => {
+    if (walletCtx?.publicKey !== null) {
+      checkCompleted()
+    }
+  }, [walletCtx])
+
+  const checkCompleted = async () => {
+    if (walletCtx?.publicKey !== null && addr !== undefined) {
+      const created = await isPoolCreated(addr, NATIVE_MINT)
+      setIsPoolCreated(created)
+      const result = await isPoolCompleted(addr, NATIVE_MINT)
+      setIsPoolComplete(result)
+      const tradingFee = await getTradingFee()
+      setTradingFee(Number(tradingFee) / FEE_PRE_DIV)
+    }
+  }
+
+  const onChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (Number(e.target.value) < 0) return;
+    setAmount(e.target.value);
+  };
+
+  const onTrade = () => {
+    if (!walletCtx) {
+      toast.error('No Wallet Connected!');
+      return;
+    }
+
+    if (Number(amount) == 0) {
+      toast.warning('Please input amount');
+      return;
+    }
+
+    let outputAmount = calculateOutputAmount(1);
+
+    setIsTradeDialogOpen(true);
+  };
+
+  const calculateOutputAmount = (percent: number) => {
+    // console.log("created === ", created);
+    const outputTokenAmount = Math.trunc((Number(amount) * (Number(created.realBaseReserves) + Number(created.virtBaseReserves)) / 10 ** TOKEN_DECIMALS) / ((Number(created.virtQuoteReserves) + Number(created.realQuoteReserves)) / LAMPORTS_PER_SOL + Number(amount)));
+    return outputTokenAmount * percent;
+  }
+
 
   return (
     <section className="flex flex-col items-center py-24 w-full [background:linear-gradient(180deg,rgba(4,5,16,1)_0%,rgba(7,5,18,1)_100%)]">
@@ -42,75 +210,73 @@ export const PresaleSection = (): JSX.Element => {
           Presale Live
         </h2>
 
-        <div className="flex flex-col max-w-[800px] w-full mx-auto mt-16">
-          <p className="w-fit mx-auto [font-family:'Arial-Narrow',Helvetica] font-normal text-gray-400 text-[17.6px] text-center tracking-[0] leading-[28.2px]">
-            Only 50 emperor pass NFTs will exist. Each pass grants exclusive benefits and privileges within The Empire.
-          </p>
-        </div>
-
         <div className="flex flex-wrap justify-center gap-8 mt-16">
-          {/* Elite Benefits Card */}
-          <Card className="w-[556px] border border-solid border-[#141625] shadow-[0px_10px_30px_#00000080] [background:linear-gradient(90deg,rgba(7,5,18,1)_0%,rgba(4,5,16,1)_100%)] rounded-xl">
-            <CardContent className="p-[33px] flex flex-col gap-[23.9px]">
-              <h3 className="[font-family:'Arial-Bold',Helvetica] font-bold text-[#a3ff12] text-2xl tracking-[0] leading-[28.8px] whitespace-nowrap">
-                Elite Benefits
-              </h3>
-
-              <div className="flex flex-col gap-[15.5px]">
-                {eliteBenefits.map((benefit, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <img src="/king.svg" alt="king" height={16} width={16} />
-                    <p className="[font-family:'Arial-Narrow',Helvetica] font-normal text-white text-base tracking-[0] leading-[25.6px] whitespace-nowrap">
-                      {benefit}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Emperor Access Key Card */}
           <Card className="w-[556px] border border-solid border-[#141625] shadow-[0px_0px_30px_#a3ff12] [background:linear-gradient(143deg,rgba(7,5,18,1)_0%,rgba(4,5,16,1)_100%)] rounded-xl relative">
             <CardContent className="p-8 flex flex-col items-center">
-              <div className="relative w-24 h-24 mb-12">
-                <div className="absolute w-24 h-24 top-0 left-0 bg-[#a3ff12] rounded-[48px] blur-[5px] opacity-75" />
-                <div className="flex w-20 h-20 items-center justify-center absolute top-2 left-2 bg-[#040510] rounded-[40px]">
-                  <CrownIcon className="text-[#a3ff12] w-10 h-10" />
-                </div>
-              </div>
+              <div className='flex flex-col gap-10 py-6'>
+                <PresaleProgress
+                  percentageSold={84.79}
+                  totalRaised={14961994.34}
+                  tokensSold={534359016.9}
+                />
+                
+                <TokenPrice 
+                  currentPrice="0.0757" 
+                  nextPrice="0.0781" 
+                  symbol="$EMP" 
+                />
+                
+                <PaymentOptions 
+                  options={paymentOptions} 
+                  selectedOption={selectedPayment} 
+                  onSelect={setSelectedPayment} 
+                />
+                
+                {/* <TokenCalculator 
+                  tokenSymbol="$EMP" 
+                  paymentSymbol={payment.symbol}
+                  exchangeRate={payment.exchangeRate}
+                  paymentIcon='/sol.png'
+                  tokenIcon={<TokenIcon />}
+                /> */}
 
-              <h3 className="[font-family:'Arial-Bold',Helvetica] font-bold text-[#a3ff12] text-[28px] text-center tracking-[0] leading-[33.6px] whitespace-nowrap mb-4">
-                EMPEROR ACCESS KEY
-              </h3>
-
-              <p className="[font-family:'Arial-Narrow',Helvetica] font-normal text-gray-300 text-base text-center tracking-[0] leading-[25.6px] mb-8">
-                This NFT certifies the holder as a permanent member of Emperor Elite Circle. Full access to private events, alpha intel, and exclusive drops.
-              </p>
-
-              <div className="flex gap-4 mb-8">
-                {socialIcons.map((icon, index) => (
-                  <div
-                    key={index}
-                    className="flex w-10 h-10 items-center justify-center bg-[#141625] rounded-[20px]"
-                  >
-                    {icon}
+                <div className="flex flex-col w-full space-y-2">
+                  <div className="flex justify-between w-full gap-3">
+                    <div className="flex flex-col relative">
+                      <span className="text-gray-300">{payment.symbol} you pay</span>
+                      <div className="flex-1 relative">
+                        <input
+                          type="number"
+                          value={payAmount}
+                          onChange={handlePayChange}
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 pl-3 pr-3 text-white focus:outline-none focus:ring-1 focus:ring-yellow-400/50"
+                        />
+                        <div className="absolute inset-y-0 right-8 flex items-center pl-3 pointer-events-none">
+                          <img src="/sol.png" alt="sol" className="rounded-full" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col relative">
+                      <span className="text-gray-300">EMP you receive</span>
+                      <div className="flex-1 relative">
+                        <input
+                          type="number"
+                          value={receiveAmount}
+                          readOnly
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 pl-3 pr-3 text-white focus:outline-none"
+                        />
+                        <div className="absolute inset-y-0 right-8 flex items-center pl-3 pointer-events-none">
+                          {<TokenIcon />}
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                ))}
+                </div>
+
+                <button type='button' className="bg-[#a3ff12] hover:bg-[#a3ff12]/90 text-[#040510] [font-family:'Arial-Bold',Helvetica] rounded-md py-2 text-base font-bold mt-2" onClick={onTrade}>BUY</button>
               </div>
-
-              <p className="mb-8 text-center">
-                <span className="font-bold text-[#a3ff12] [font-family:'Arial-Bold',Helvetica]">
-                  Only 50 NFTs
-                </span>
-                <span className="[font-family:'Arial-Regular',Helvetica] text-gray-500">
-                  {" "}
-                  will ever exist
-                </span>
-              </p>
-
-              <Button className="w-full bg-[#a3ff12] hover:bg-[#a3ff12]/90 text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold">
-                click here to mint
-              </Button>
             </CardContent>
           </Card>
         </div>

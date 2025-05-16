@@ -15,7 +15,10 @@ import { NATIVE_MINT,
 import BN from 'bn.js';
 
 import { PRESALE_PROGRAM_ID, 
-    FEE_PRE_DIV 
+    FEE_PRE_DIV,
+    PRESALE_ID,
+    USDC_ADDRESS,
+    USDT_ADDRESS
 } from './constants';
 import { IDL } from './idl';
 import * as Keys from './keys';
@@ -23,7 +26,6 @@ import { connection } from '../../engine/config';
 import { send } from "../../engine/utils";
 import { TOKEN_DECIMALS } from "../../engine/consts";
 import { AnchorWallet } from "@solana/wallet-adapter-react";
-import { getCouponInfoByWallet } from "../../api/user";
 
 
 const getProgram = (wallet: AnchorWallet | undefined) => {
@@ -556,6 +558,55 @@ export const contract_withdraw2Tx = async (walletCtx: AnchorWallet | undefined, 
             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
         })
         // .preInstructions([web3.ComputeBudgetProgram.setComputeUnitLimit({ units: 300_000 })]);
+        .instruction();
+
+    return ix;
+};
+
+export const contract_createPresale = async (
+    walletCtx: AnchorWallet,
+    hardcapAmount: number,
+    pricePerToken: number,
+    pricePerTokenNext: number,
+    startTime: number,
+    endTime: number,
+    claimTime: number,
+) => {
+    if (!walletCtx) {
+        console.error("Invalid wallet");
+        throw new WalletNotConnectedError();
+    }
+
+    const program = getProgram(walletCtx);
+    
+    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+    if (!(presaleInfoKey instanceof PublicKey) || !program) {
+        throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
+    }
+
+    const vaultKey = await Keys.getVaultKey(presaleInfoKey);
+    if (!(vaultKey instanceof PublicKey)) {
+        throw new Error("Invalid vaultKey: must be a PublicKey");
+    }
+    
+    const ix = await program.methods
+        .createPresale({
+            hardcapAmount: new BN(hardcapAmount),
+            pricePerToken: new BN(pricePerToken),
+            pricePerTokenNext: new BN(pricePerTokenNext),
+            startTime: new BN(startTime),
+            endTime: new BN(endTime),
+            claimTime: new BN(claimTime),
+            identifier: new BN(Number(PRESALE_ID))
+        })
+        .accounts({
+            presaleInfo: presaleInfoKey,
+            authority: walletCtx.publicKey,
+            usdtMint: new PublicKey(USDT_ADDRESS),
+            usdcMint: new PublicKey(USDC_ADDRESS),
+            vault: vaultKey,
+            systemProgram: SystemProgram.programId
+        })
         .instruction();
 
     return ix;

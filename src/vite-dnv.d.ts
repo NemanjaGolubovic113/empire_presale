@@ -11,6 +11,10 @@ interface ImportMetaEnv {
     readonly VITE_TOKEN_DECIMALS: number;
     readonly VITE_RPC_MAINNET: string;
     readonly VITE_RPC_DEVNET: string;
+    readonly VITE_PRESALE_SEED: string;
+    readonly VITE_PRESALE_ID: string;
+    readonly VITE_USDT_ADDRESS: string;
+    readonly VITE_USDC_ADDRESS: string;
 }
   
 interface ImportMeta {

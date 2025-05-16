@@ -1,5 +1,4 @@
 import React from 'react';
-import { Feather as Ethereum, CreditCard } from 'lucide-react';
 
 interface PaymentOption {
   id: string;

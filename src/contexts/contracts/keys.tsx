@@ -6,7 +6,9 @@ import { PRESALE_PROGRAM_ID,
     MAINSTATE_PREFIX_SEED, 
     POOLSTATE_PREFIX_SEED,
     USER_INFO_SEED,
-    VAULT_SEED
+    VAULT_SEED,
+    PRESALE_SEED,
+    PRESALE_ID
 } from './constants';
 
 
@@ -45,16 +47,16 @@ export const getUserInfoKey = async (poolKey: PublicKey, buyerKey: PublicKey) =>
     return userInfoKey;
 }
 
-export const getVaultKey = async (poolKey: PublicKey) => {
-    const [userInfoKey] = await asyncGetPda(
-        [
-            Buffer.from(VAULT_SEED),
-            poolKey.toBuffer(),
-        ],
-        PRESALE_PROGRAM_ID
-    );
-    return userInfoKey;
-}
+// export const getVaultKey = async (poolKey: PublicKey) => {
+//     const [userInfoKey] = await asyncGetPda(
+//         [
+//             Buffer.from(VAULT_SEED),
+//             poolKey.toBuffer(),
+//         ],
+//         PRESALE_PROGRAM_ID
+//     );
+//     return userInfoKey;
+// }
 
 export const getAssociatedTokenAccountKey = async (ownerPubkey: PublicKey, tokenMint: PublicKey) => {
     let associatedTokenAccountKey = PublicKey.findProgramAddressSync(
@@ -67,3 +69,27 @@ export const getAssociatedTokenAccountKey = async (ownerPubkey: PublicKey, token
     )[0];
     return associatedTokenAccountKey;
 };
+
+export const getPresaleInfoKey = async (wallet: PublicKey) => {
+    const [presaleInfoKey] = await asyncGetPda(
+        [
+            Buffer.from(PRESALE_SEED),
+            wallet.toBuffer(),
+            new Uint8Array([Number(PRESALE_ID)]),
+        ],
+        PRESALE_PROGRAM_ID
+    );
+    return presaleInfoKey;
+}
+
+export const getVaultKey = async (presaleInfoKey: PublicKey) => {
+    const [userInfoKey] = await asyncGetPda(
+        [
+            Buffer.from(VAULT_SEED),
+            presaleInfoKey.toBuffer(),
+            new Uint8Array([Number(PRESALE_ID)]),
+        ],
+        PRESALE_PROGRAM_ID
+    );
+    return userInfoKey;
+}
