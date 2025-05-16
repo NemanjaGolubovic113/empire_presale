@@ -13,3 +13,5 @@ export const PRESALE_SEED = import.meta.env.VITE_PRESALE_SEED!;
 export const PRESALE_ID = import.meta.env.VITE_PRESALE_ID!;
 export const USDT_ADDRESS = import.meta.env.VITE_USDT_ADDRESS!;
 export const USDC_ADDRESS = import.meta.env.VITE_USDC_ADDRESS!;
+export const TOKEN_MINT_ADDRESS = import.meta.env.VITE_TOKEN_MINT_ADDRESS!;
+export const PRESALE_ADMIN_ADDRESS = import.meta.env.VITE_PRESALE_ADMIN_ADDRESS!;

@@ -38,24 +38,31 @@ const TokenIcon = () => (
   </span>
 );
 interface ContractContextType {
-  isPoolCreated: (baseToken: string, quoteMint: PublicKey) => Promise<any>;
-  getUserInfo: (baseToken: string) => Promise<any>;
-  getBuyTx: (token: string, amount: number, infAddr: string, infBenefit: number, userBenefit: number) => Promise<any>;
-  getSellTx: (token: string, amount: number) => Promise<any>;
-  isPoolComplete: (baseToken: string, quoteMint: PublicKey) => Promise<boolean>;
-  getClaimTx: (baseToken: string) => Promise<any>;
-  getWithdraw2Tx: (baseToken: string) => Promise<any>;
-  getTradingFee: () => Promise<any>;
-
-
   createPresale: (
-        hardcapAmount: number,
-        pricePerToken: number,
-        pricePerTokenNext: number,
-        startTime: number,
-        endTime: number,
-        claimTime: number
-    ) => Promise<any>;
+    hardcapAmount: number,
+    pricePerToken: number,
+    pricePerTokenNext: number,
+    startTime: number,
+    endTime: number,
+    claimTime: number
+  ) => Promise<any>;
+  updatePresale: (
+    pricePerToken: number,
+    pricePerTokenNext: number,
+    hardcapAmount: number,
+    startTime: number,
+    endTime: number,
+    claimTime: number
+  ) => Promise<any>;
+  depositToken: (amount: number) => Promise<any>;
+  buySol: (amount: number) => Promise<any>;
+  buyUsdc: (amount: number) => Promise<any>;
+  buyUsdt: (amount: number) => Promise<any>;
+  claimToken: () => Promise<any>;
+  withdrawToken: () => Promise<any>;
+  withdrawSol: () => Promise<any>;
+  withdrawUsdt: () => Promise<any>;
+  withdrawUsdc: () => Promise<any>;
 }
 
 export const PresaleSection = (): JSX.Element => {
@@ -71,7 +78,7 @@ export const PresaleSection = (): JSX.Element => {
   const addr = location.pathname.split("/")[2];
 
   const walletCtx = useAnchorWallet();
-  const { isPoolComplete: isPoolCompleted, getUserInfo, isPoolCreated, getTradingFee } = useContract() as ContractContextType;
+  const { withdrawUsdc } = useContract() as ContractContextType;
 
   const [isTradeDialogOpen, setIsTradeDialogOpen] = useState(false)
   const [amount, setAmount] = useState<string | ''>('');
@@ -151,22 +158,6 @@ export const PresaleSection = (): JSX.Element => {
   const payment = getPaymentDetails();
 
 
-  useEffect(() => {
-    if (walletCtx?.publicKey !== null) {
-      checkCompleted()
-    }
-  }, [walletCtx])
-
-  const checkCompleted = async () => {
-    if (walletCtx?.publicKey !== null && addr !== undefined) {
-      const created = await isPoolCreated(addr, NATIVE_MINT)
-      setIsPoolCreated(created)
-      const result = await isPoolCompleted(addr, NATIVE_MINT)
-      setIsPoolComplete(result)
-      const tradingFee = await getTradingFee()
-      setTradingFee(Number(tradingFee) / FEE_PRE_DIV)
-    }
-  }
 
   const onChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (Number(e.target.value) < 0) return;

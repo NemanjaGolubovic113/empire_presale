@@ -35,17 +35,17 @@ export const getPoolStateKey = async (baseMint: PublicKey, quoteMint: PublicKey)
     return poolStateKey;
 };
 
-export const getUserInfoKey = async (poolKey: PublicKey, buyerKey: PublicKey) => {
-    const [userInfoKey] = await asyncGetPda(
-        [
-            Buffer.from(USER_INFO_SEED),
-            poolKey.toBuffer(),
-            buyerKey.toBuffer(),
-        ],
-        PRESALE_PROGRAM_ID
-    );
-    return userInfoKey;
-}
+// export const getUserInfoKey = async (poolKey: PublicKey, buyerKey: PublicKey) => {
+//     const [userInfoKey] = await asyncGetPda(
+//         [
+//             Buffer.from(USER_INFO_SEED),
+//             poolKey.toBuffer(),
+//             buyerKey.toBuffer(),
+//         ],
+//         PRESALE_PROGRAM_ID
+//     );
+//     return userInfoKey;
+// }
 
 // export const getVaultKey = async (poolKey: PublicKey) => {
 //     const [userInfoKey] = await asyncGetPda(
@@ -87,6 +87,19 @@ export const getVaultKey = async (presaleInfoKey: PublicKey) => {
         [
             Buffer.from(VAULT_SEED),
             presaleInfoKey.toBuffer(),
+            new Uint8Array([Number(PRESALE_ID)]),
+        ],
+        PRESALE_PROGRAM_ID
+    );
+    return userInfoKey;
+}
+
+export const getUserInfoKey = async (presaleAdmin: PublicKey, buyerKey: PublicKey) => {
+    const [userInfoKey] = await asyncGetPda(
+        [
+            Buffer.from(USER_INFO_SEED),
+            presaleAdmin.toBuffer(),
+            buyerKey.toBuffer(),
             new Uint8Array([Number(PRESALE_ID)]),
         ],
         PRESALE_PROGRAM_ID

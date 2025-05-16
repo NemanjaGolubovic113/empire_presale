@@ -15,6 +15,7 @@ interface ImportMetaEnv {
     readonly VITE_PRESALE_ID: string;
     readonly VITE_USDT_ADDRESS: string;
     readonly VITE_USDC_ADDRESS: string;
+    readonly VITE_TOKEN_MINT_ADDRESS: string;
 }
   
 interface ImportMeta {
