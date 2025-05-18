@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useState, useContext } from 'react';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
 import {
-    contract_getPoolStateInfo,
+    contract_getPresaleInfo,
     contract_getUserInfo,
 
     contract_createPresale,
@@ -13,15 +13,12 @@ import {
     contract_buyUsdt,
     contract_claimToken,
     contract_withdrawToken
-    // contract_withdrawSol,
-    // contract_withdrawUsdt,
-    // contract_withdrawUsdc
 } from './contracts';
 
 
 interface ContractContextType {
     getPresaleInfo: () => Promise<any>;
-    getUserInfo: (baseToken: string) => Promise<any>;
+    getUserInfo: () => Promise<any>;
 
     createPresale: (
         hardcapAmount: number,
@@ -45,9 +42,6 @@ interface ContractContextType {
     buyUsdt: (amount: number) => Promise<any>;
     claimToken: () => Promise<any>;
     withdrawToken: () => Promise<any>;
-    // withdrawSol: () => Promise<any>;
-    // withdrawUsdt: () => Promise<any>;
-    // withdrawUsdc: () => Promise<any>;
 }
 
 export const ContractContext = createContext<ContractContextType | null>(null);
@@ -59,11 +53,11 @@ const ContractContextProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
 
     const getPresaleInfo = async () => {
-        return await contract_getPoolStateInfo(walletCtx);
+        return await contract_getPresaleInfo(walletCtx);
     };
 
-    const getUserInfo = async (baseToken: string) => {
-        return await contract_getUserInfo(walletCtx, baseToken);
+    const getUserInfo = async () => {
+        return await contract_getUserInfo(walletCtx);
     };
 
     const createPresale = async (
@@ -274,9 +268,6 @@ const ContractContextProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         buyUsdt,
         claimToken,
         withdrawToken
-        // withdrawSol,
-        // withdrawUsdt,
-        // withdrawUsdc,
     };
 
     return <ContractContext.Provider value={context}>{children}</ContractContext.Provider>

@@ -31,6 +31,7 @@ interface ImportMetaEnv {
     readonly VITE_PRESALE_ENDTIME_UPDATE: number;
     readonly VITE_PRESALE_CLAIMTIME_UPDATE: number;
     readonly VITE_DEPOSIT_TOKEN_AMOUNT: number;
+    readonly VITE_PRESALE_HARDCAP_USD_AMOUNT: number;
 }
   
 interface ImportMeta {

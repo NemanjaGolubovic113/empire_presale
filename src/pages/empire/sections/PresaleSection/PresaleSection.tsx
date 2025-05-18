@@ -4,27 +4,15 @@ import { Card, CardContent } from "../../../../components/ui/card";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { LAMPORTS_PER_SOL, Transaction, PublicKey, VersionedTransaction } from '@solana/web3.js'
-import { NATIVE_MINT } from '@solana/spl-token'
-import {
-  Token,
-  TokenAmount,
-  TOKEN_PROGRAM_ID
-} from "@raydium-io/raydium-sdk";
+import { LAMPORTS_PER_SOL, Transaction } from '@solana/web3.js'
 import { toast } from "react-toastify";
-import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react'
-import ProgressBar from "../../../../components/ui/progressbar";
 import { useContract } from "../../../../contexts/ContractContext";
-import { Header } from "../../../../components/Header";
 import { TOKEN_DECIMALS } from "../../../../engine/consts";
-import { send } from "../../../../engine/utils";
+import { send, fetchSOLPrice } from "../../../../engine/utils";
 import { connection } from "../../../../engine/config";
-import { FEE_PRE_DIV } from "../../../../contexts/contracts/constants";
-import TokenCalculator from "../../../../components/ui/TokenCalculator";
 import TokenPrice from "../../../../components/ui/TokenPrice";
 import PresaleProgress from "../../../../components/ui/PresaleProgress";
 import PaymentOptions from "../../../../components/ui/PaymentOptions";
-import { contract_buySol, contract_buyUsdc, contract_buyUsdt } from "../../../../contexts/contracts";
 
 const TokenIcon = () => (
   <span className="text-yellow-300 font-bold flex items-center justify-center w-6 h-6">
@@ -54,40 +42,28 @@ interface ContractContextType {
   buyUsdt: (amount: number) => Promise<any>;
   claimToken: () => Promise<any>;
   withdrawToken: () => Promise<any>;
-  // withdrawSol: () => Promise<any>;
-  // withdrawUsdt: () => Promise<any>;
-  // withdrawUsdc: () => Promise<any>;
+  getPresaleInfo: () => Promise<any>;
+  getUserInfo: () => Promise<any>;
 }
 
 export const PresaleSection = (): JSX.Element => {
-  // Social icons for the NFT card
-  const socialIcons = [
-    <div className="text-[#a3ff12]">
-      <img src="exclusiveaccess.svg" alt="exclusiveaccess" width={16} height={16} />
-    </div>,
-    <img src="globalcommunity.svg" alt="globalcommunity" width={16} height={16} />,
-    <img src="realworldutility.svg" alt="realworldutility" width={16} height={16} />
-  ];
-  const location = useLocation();
-  const addr = location.pathname.split("/")[2];
   const adminAddress = import.meta.env.VITE_PRESALE_ADMIN_ADDRESS;
+  const currentPrice = import.meta.env.VITE_PRESALE_PRICE_PER_TOKEN;
+  const nextPrice = import.meta.env.VITE_PRESALE_PRICE_PER_TOKEN_NEXT;
 
   const walletCtx = useAnchorWallet();
-  const { buySol, buyUsdc, buyUsdt, createPresale, updatePresale, depositToken, claimToken, withdrawToken } = useContract() as ContractContextType;
+  const { buySol, buyUsdc, buyUsdt, createPresale, updatePresale, depositToken, claimToken, withdrawToken, getPresaleInfo, getUserInfo } = useContract() as ContractContextType;
 
-  const [isTradeDialogOpen, setIsTradeDialogOpen] = useState(false)
   const [amount, setAmount] = useState<string | ''>('');
-  const [currentCoin, setCurrentCoin] = useState('sol')
-  const [isPoolComplete, setIsPoolComplete] = useState(false)
-  const [created, setIsPoolCreated] = useState(null)
-  const [tradingFee, setTradingFee] = useState<number | null>(null)
-  const [tokenResult, setTokenResult] = useState<JSX.Element | null>(null);
-  const [couponResult, setCouponResult] = useState<JSX.Element | null>(null);
   const [payAmount, setPayAmount] = useState<string>('1');
   const [receiveAmount, setReceiveAmount] = useState<string>('1.5');
   const [depositTokenAmount, setDepositTokenAmount] = useState<string>('0');
 
   const [selectedPayment, setSelectedPayment] = useState('sol');
+  const [presaleInfo, setPresaleInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [claimEnable, setClaimEnable] = useState(false);
+  const [buyTokenAmount, setBuyTokenAmount] = useState(0);
   
   const paymentOptions = [
     { 
@@ -112,19 +88,76 @@ export const PresaleSection = (): JSX.Element => {
     }
   ];
 
+  useEffect(() => {
+    const fetchPresaleInfo = async () => {
+      if (walletCtx?.publicKey !== null) {
+        const presaleInfo = await getPresaleInfo();
+        // console.log("presaleInfo::::", "deposit = ", Number(presaleInfo.depositTokenAmount), "hardcap = ", Number(presaleInfo.hardcapAmount), "sol = ", Number(presaleInfo.solAmount));
+        // console.log("presaleInfo::::", "sold = ", Number(presaleInfo.soldTokenAmount), "total = ", Number(presaleInfo.totalAmount), "usdc = ", Number(presaleInfo.usdcAmount));
+        // console.log("usdt = ", Number(presaleInfo.usdtAmount));
+        // console.log("presaleInfo :::: ", presaleInfo);
 
-  const handlePayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!presaleInfo) {
+          setPresaleInfo(null);
+        } else {
+          setPresaleInfo(presaleInfo);
+          const now = Date.now() / 1000;
+          if (now > presaleInfo.claimTime) {
+            setClaimEnable(true);
+          } else {
+            setClaimEnable(false);
+          }
+        }
+
+        const userInfo = await getUserInfo();
+        if (userInfo) {
+          // console.log("userInfo ==== ", Number(userInfo.buyTokenAmount), ", ", Number(userInfo.claimAmount))
+          setUserInfo(userInfo);
+          const buyAnount = Number(userInfo?.buyTokenAmount) / 10 ** TOKEN_DECIMALS;
+          setBuyTokenAmount(buyAnount);
+        } else {
+          setUserInfo(null);
+        }
+      }
+    }
+    fetchPresaleInfo();
+
+  }, [walletCtx])
+
+  const handlePayChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || /^\d*\.?\d*$/.test(value)) {
       setPayAmount(value);
       if (value) {
-        const amount = parseFloat(value)/* * exchangeRate*/;
-        setReceiveAmount(amount.toString());
+        if (selectedPayment === 'usdt' || selectedPayment === 'usdc') {
+          const amount = parseFloat(value) / currentPrice;
+          setReceiveAmount(amount.toString());
+        } else if (selectedPayment === 'sol') {
+          const solPrice = await fetchSOLPrice();
+          const amount = parseFloat(value) * solPrice / currentPrice;
+          setReceiveAmount(amount.toString());
+        }
       } else {
         setReceiveAmount('');
       }
     }
   };
+
+  const onSelectPayment = async (id: string) => {
+    setSelectedPayment(id);
+    if (payAmount) {
+      if (id === 'usdt' || id === 'usdc') {
+        const amount = parseFloat(payAmount) / currentPrice;
+        setReceiveAmount(amount.toString());
+      } else if (id === 'sol') {
+        const solPrice = await fetchSOLPrice();
+        const amount = parseFloat(payAmount) * solPrice / currentPrice;
+        setReceiveAmount(amount.toString());
+      }
+    } else {
+      setReceiveAmount('');
+    }
+  }
 
   const getPaymentDetails = () => {
     switch (selectedPayment) {
@@ -221,10 +254,6 @@ export const PresaleSection = (): JSX.Element => {
         toast.error('An unknown error occurred.');
       }
     }
-
-    // let outputAmount = calculateOutputAmount(1);
-
-    setIsTradeDialogOpen(true);
   };
 
   const onCreatePresale = async () => {
@@ -405,98 +434,6 @@ export const PresaleSection = (): JSX.Element => {
     }
   };
 
-  // const onWithdrawSol = async () => {
-  //   if (!walletCtx) {
-  //     toast.error('No Wallet Connected!');
-  //     return;
-  //   }
-
-  //   if (walletCtx.publicKey.toBase58() !== adminAddress) {
-  //     toast.error('No admin wallet!');
-  //     return;
-  //   }
-
-  //   const id = toast.loading(`Withdrawing sol ...`);
-  //   try {
-  //     await withdrawSol();
-  //     toast.dismiss(id);
-  //     toast.success('Success!');
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.dismiss(id);
-  //     if (err instanceof Error) {
-  //       toast.error(err.message);
-  //     } else {
-  //       toast.error('An unknown error occurred.');
-  //     }
-  //   }
-  // };
-
-  // const onWithdrawUSDC = async () => {
-  //   if (!walletCtx) {
-  //     toast.error('No Wallet Connected!');
-  //     return;
-  //   }
-
-  //   if (walletCtx.publicKey.toBase58() !== adminAddress) {
-  //     toast.error('No admin wallet!');
-  //     return;
-  //   }
-
-  //   const id = toast.loading(`Withdrawing USDC ...`);
-  //   try {
-  //     await withdrawUsdc();
-  //     toast.dismiss(id);
-  //     toast.success('Success!');
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.dismiss(id);
-  //     if (err instanceof Error) {
-  //       toast.error(err.message);
-  //     } else {
-  //       toast.error('An unknown error occurred.');
-  //     }
-  //   }
-  // };
-
-  // const onWithdrawUSDT = async () => {
-  //   if (!walletCtx) {
-  //     toast.error('No Wallet Connected!');
-  //     return;
-  //   }
-
-  //   if (walletCtx.publicKey.toBase58() !== adminAddress) {
-  //     toast.error('No admin wallet!');
-  //     return;
-  //   }
-
-  //   const id = toast.loading(`Withdrawing USDT ...`);
-  //   try {
-  //     await withdrawUsdt();
-  //     toast.dismiss(id);
-  //     toast.success('Success!');
-  //   } catch (err) {
-  //     console.error(err);
-  //     toast.dismiss(id);
-  //     if (err instanceof Error) {
-  //       toast.error(err.message);
-  //     } else {
-  //       toast.error('An unknown error occurred.');
-  //     }
-  //   }
-  // };
-
-
-
-
-
-
-  // const calculateOutputAmount = (percent: number) => {
-  //   // console.log("created === ", created);
-  //   const outputTokenAmount = Math.trunc((Number(amount) * (Number(created.realBaseReserves) + Number(created.virtBaseReserves)) / 10 ** TOKEN_DECIMALS) / ((Number(created.virtQuoteReserves) + Number(created.realQuoteReserves)) / LAMPORTS_PER_SOL + Number(amount)));
-  //   return outputTokenAmount * percent;
-  // }
-
 
   return (
     <section className="flex flex-col items-center py-24 w-full [background:linear-gradient(180deg,rgba(4,5,16,1)_0%,rgba(7,5,18,1)_100%)]">
@@ -516,71 +453,82 @@ export const PresaleSection = (): JSX.Element => {
           {/* Emperor Access Key Card */}
           <Card className="w-[365px] sm:w-[556px] border border-solid border-[#141625] shadow-[0px_0px_30px_#a3ff12] [background:linear-gradient(143deg,rgba(7,5,18,1)_0%,rgba(4,5,16,1)_100%)] rounded-xl relative">
             <CardContent className="p-8 flex flex-col items-center">
-              <div className='flex flex-col gap-10 py-6'>
+              <div className='flex flex-col gap-10 py-6 w-full'>
                 <PresaleProgress
-                  percentageSold={84.79}
-                  totalRaised={14961994.34}
-                  tokensSold={534359016.9}
+                  percentageSold={presaleInfo?.totalAmount / LAMPORTS_PER_SOL}
+                  totalRaised={presaleInfo?.totalAmount / LAMPORTS_PER_SOL}
+                  tokensSold={Number(presaleInfo?.soldTokenAmount) / 10 ** TOKEN_DECIMALS}
                 />
                 
-                <TokenPrice 
-                  currentPrice="0.0757" 
-                  nextPrice="0.0781" 
-                  symbol="$EMP" 
-                />
-                
-                <PaymentOptions 
-                  options={paymentOptions} 
-                  selectedOption={selectedPayment} 
-                  onSelect={setSelectedPayment} 
-                />
-                
-                {/* <TokenCalculator 
-                  tokenSymbol="$EMP" 
-                  paymentSymbol={payment.symbol}
-                  exchangeRate={payment.exchangeRate}
-                  paymentIcon='/sol.png'
-                  tokenIcon={<TokenIcon />}
-                /> */}
-
-                <div className="flex flex-col w-full space-y-2">
-                  <div className="flex justify-between w-full gap-3">
-                    <div className="flex flex-col relative">
-                      <span className="text-gray-300">{payment.symbol} you pay</span>
-                      <div className="flex-1 relative">
-                        <input
-                          type="number"
-                          value={payAmount}
-                          onChange={handlePayChange}
-                          className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 pl-3 pr-3 text-white focus:outline-none focus:ring-1 focus:ring-yellow-400/50"
-                        />
-                        <div className="absolute inset-y-0 right-8 flex items-center pl-3 pointer-events-none">
-                          <img src={`/${selectedPayment}.png`} alt="sol" className="rounded-full" />
-                        </div>
-                      </div>
-                    </div>
+                {claimEnable === false ? (
+                  <>
+                    <TokenPrice 
+                      currentPrice={currentPrice}
+                      nextPrice={nextPrice}
+                      symbol="$EMP" 
+                    />
                     
-                    <div className="flex flex-col relative">
-                      <span className="text-gray-300">EMP you receive</span>
-                      <div className="flex-1 relative">
-                        <input
-                          type="number"
-                          value={receiveAmount}
-                          readOnly
-                          className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 pl-3 pr-3 text-white focus:outline-none"
-                        />
-                        <div className="absolute inset-y-0 right-8 flex items-center pl-3 pointer-events-none">
-                          {<TokenIcon />}
+                    <PaymentOptions 
+                      options={paymentOptions} 
+                      selectedOption={selectedPayment} 
+                      // onSelect={setSelectedPayment} 
+                      onSelect={onSelectPayment} 
+                    />
+                    
+                    {/* <TokenCalculator 
+                      tokenSymbol="$EMP" 
+                      paymentSymbol={payment.symbol}
+                      exchangeRate={payment.exchangeRate}
+                      paymentIcon='/sol.png'
+                      tokenIcon={<TokenIcon />}
+                    /> */}
+
+                    <div className="flex flex-col w-full space-y-2">
+                      <div className="flex justify-between w-full gap-3">
+                        <div className="flex flex-col relative">
+                          <span className="text-gray-300">{payment.symbol} you pay</span>
+                          <div className="flex-1 relative">
+                            <input
+                              type="number"
+                              value={payAmount}
+                              onChange={handlePayChange}
+                              className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 pl-3 pr-3 text-white focus:outline-none focus:ring-1 focus:ring-yellow-400/50"
+                            />
+                            <div className="absolute inset-y-0 right-8 flex items-center pl-3 pointer-events-none">
+                              <img src={`/${selectedPayment}.png`} alt="sol" className="rounded-full" />
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col relative">
+                          <span className="text-gray-300">EMP you receive</span>
+                          <div className="flex-1 relative">
+                            <input
+                              type="number"
+                              value={receiveAmount}
+                              readOnly
+                              className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 pl-3 pr-3 text-white focus:outline-none"
+                            />
+                            <div className="absolute inset-y-0 right-8 flex items-center pl-3 pointer-events-none">
+                              {<TokenIcon />}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <button type='button' className="bg-[#a3ff12] hover:bg-[#a3ff12]/90 text-[#040510] [font-family:'Arial-Bold',Helvetica] rounded-md py-2 text-base font-bold mt-2" onClick={onTrade}>BUY</button>
-                <Button className="bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-base md:text-[17.6px] px-6 md:px-8 py-3 md:py-4 rounded" onClick={onClaimToken}>
-                  Claim Token
-                </Button>
+                    <button type='button' className="bg-[#a3ff12] hover:bg-[#a3ff12]/90 text-[#040510] [font-family:'Arial-Bold',Helvetica] rounded-md py-2 text-base font-bold mt-2" onClick={onTrade}>BUY</button>
+                  </>
+
+                ) : (
+                  <button className="w-full bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-base md:text-[17.6px] px-6 md:px-8 py-2 rounded" onClick={onClaimToken}>
+                    Claim Token
+                  </button>
+                )}
+                
+                <div className="text-white">
+                  Your Token Amount: {buyTokenAmount.toFixed(3)} EMP
+                </div>
 
                 {walletCtx?.publicKey.toBase58() === adminAddress && (
                   <>
@@ -623,28 +571,6 @@ export const PresaleSection = (): JSX.Element => {
                     >
                       Withdraw Token
                     </Button>
-              
-                      {/* <Button
-                        className="bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-sm px-6 md:px-8 py-3 md:py-4 rounded"
-                        onClick={onWithdrawSol}
-                      >
-                        Withdraw Sol
-                      </Button>
-              
-                      <Button
-                        className="bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-sm px-6 md:px-8 py-3 md:py-4 rounded"
-                        onClick={onWithdrawUSDT}
-                      >
-                        Withdraw USDT
-                      </Button>
-              
-                      <Button
-                        className="bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-sm px-6 md:px-8 py-3 md:py-4 rounded"
-                        onClick={onWithdrawUSDC}
-                      >
-                        Withdraw USDC
-                      </Button> */}
-                    {/* </div> */}
                   </>
                 )}
               </div>

@@ -381,3 +381,16 @@ export function getPassedTime (timestamp: number) {
 
     return ret;
 }
+
+export async function fetchSOLPrice () {
+    while (true) {
+        try {
+            const response = await axios.get('https://api.coinbase.com/v2/prices/SOL-USD/spot');
+            const newSolPrice = Number(response.data.data.amount);
+            return newSolPrice;
+        } catch (err) {
+            console.error('Error fetching SOL price:', err);
+            await sleep(100);
+        }
+    }
+};

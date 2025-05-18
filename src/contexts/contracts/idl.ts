@@ -39,7 +39,27 @@ export const IDL: anchor.Idl = {
           "isSigner": false
         },
         {
+          "name": "usdcVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "usdtVault",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "associatedTokenProgram",
           "isMut": false,
           "isSigner": false
         }
@@ -650,6 +670,14 @@ export const IDL: anchor.Idl = {
           },
           {
             "name": "vault",
+            "type": "publicKey"
+          },
+          {
+            "name": "usdtVault",
+            "type": "publicKey"
+          },
+          {
+            "name": "usdcVault",
             "type": "publicKey"
           },
           {

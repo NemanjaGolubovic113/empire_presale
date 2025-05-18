@@ -1,8 +1,8 @@
 import React from 'react';
 
 interface TokenPriceProps {
-  currentPrice: string;
-  nextPrice: string;
+  currentPrice: number;
+  nextPrice: number;
   symbol: string;
 }
 
@@ -14,7 +14,7 @@ const TokenPrice: React.FC<TokenPriceProps> = ({ currentPrice, nextPrice, symbol
         <span className="text-green-400 font-semibold">${currentPrice}</span>
       </div>
       <div className="flex items-center">
-        <span className="text-yellow-400 font-medium text-sm">Next Price: ${nextPrice}</span>
+        <span className="text-yellow-400 font-medium">Next Price: ${nextPrice}</span>
       </div>
     </div>
   );
