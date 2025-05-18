@@ -166,11 +166,11 @@ export const sendTransaction = async (connection: Connection, walletCtx: AnchorW
         if (transaction instanceof Transaction) {
             transaction.feePayer = walletCtx.publicKey;
         }
-        // if (transaction instanceof Transaction) {
-        //     console.log('Transaction +++ 111:', await connection.simulateTransaction(transaction));
-        // } else if (transaction instanceof VersionedTransaction) {
-        //     console.log('Transaction: +++ 222', await connection.simulateTransaction(transaction));
-        // }
+        if (transaction instanceof Transaction) {
+            console.log('Transaction +++ 111:', await connection.simulateTransaction(transaction));
+        } else if (transaction instanceof VersionedTransaction) {
+            console.log('Transaction: +++ 222', await connection.simulateTransaction(transaction));
+        }
 
         const signedTx = await walletCtx.signTransaction(transaction);
         const rawTx = signedTx.serialize();

@@ -6,7 +6,7 @@ export const IDL: anchor.Idl = {
     {
       "name": "PRESALE_SEED",
       "type": "bytes",
-      "value": "[66, 80, 95, 80, 82, 69, 83, 65, 76, 69, 95, 83, 69, 69, 68]"
+      "value": "[69, 77, 80, 73, 82, 69, 95, 80, 82, 69, 83, 65, 76, 69, 95, 83, 69, 69, 68]"
     }
   ],
   "instructions": [
@@ -319,11 +319,6 @@ export const IDL: anchor.Idl = {
           "isSigner": false
         },
         {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
           "name": "usdcAssociatedTokenAccount",
           "isMut": true,
           "isSigner": false
@@ -405,11 +400,6 @@ export const IDL: anchor.Idl = {
         },
         {
           "name": "userInfo",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vault",
           "isMut": true,
           "isSigner": false
         },
@@ -546,189 +536,6 @@ export const IDL: anchor.Idl = {
         },
         {
           "name": "presaleInfo",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "presaleAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "buyer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "identifier",
-          "type": "u8"
-        }
-      ]
-    },
-    {
-      "name": "withdrawSol",
-      "accounts": [
-        {
-          "name": "presaleInfo",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "presaleAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "buyer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "identifier",
-          "type": "u8"
-        }
-      ]
-    },
-    {
-      "name": "withdrawUsdt",
-      "accounts": [
-        {
-          "name": "presaleInfo",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "usdtMint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "usdtAssociatedTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "usdtVault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "presaleAuthority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "buyer",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "rent",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "associatedTokenProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "identifier",
-          "type": "u8"
-        }
-      ]
-    },
-    {
-      "name": "withdrawUsdc",
-      "accounts": [
-        {
-          "name": "presaleInfo",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "usdcMint",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "vault",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "usdcAssociatedTokenAccount",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "usdcVault",
           "isMut": true,
           "isSigner": false
         },

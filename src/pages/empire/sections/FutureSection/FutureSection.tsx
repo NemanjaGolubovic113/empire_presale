@@ -24,9 +24,11 @@ export const FutureSection = (): JSX.Element => {
           redefining the future of decentralized finance.
         </p>
 
-        <Button className="mt-8 md:mt-10 bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-base md:text-[17.6px] px-6 md:px-8 py-3 md:py-4 rounded">
-          Become a Citizen
-        </Button>
+        <a href="https://x.com/i/communities/1920263056564891865" target="_blank">
+          <Button className="mt-8 md:mt-10 bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-base md:text-[17.6px] px-6 md:px-8 py-3 md:py-4 rounded">
+            Become a Citizen
+          </Button>
+        </a>
       </div>
     </section>
   );

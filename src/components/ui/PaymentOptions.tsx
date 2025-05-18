@@ -18,7 +18,7 @@ const PaymentOptions: React.FC<PaymentOptionsProps> = ({
   onSelect 
 }) => {
   return (
-    <div className="flex justify-between w-full gap-2">
+    <div className="grid grid-cols-2 sm:grid-cols-4 w-full gap-2">
       {options.map((option) => (
         <button
           key={option.id}

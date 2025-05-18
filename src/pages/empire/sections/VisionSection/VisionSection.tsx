@@ -75,11 +75,8 @@ export const VisionSection = (): JSX.Element => {
         </h2>
 
         <div className="flex flex-col max-w-[800px] w-full mx-auto mt-8 md:mt-16">
-          <p className="w-fit mx-auto [font-family:'Arial-Narrow',Helvetica] font-normal text-gray-400 text-base md:text-[17.6px] text-center tracking-[0] leading-relaxed md:leading-[28.2px] px-4 md:px-0">
-            BORN FROM THE SPIRIT OF ANCIENT EMPIRES AND FORGED IN THE FIRE OF
-            WEB3, THIS PROJECT ISN&#39;T ABOUT CHARTS — IT&#39;S ABOUT BUILDING A
-            THRONE. WE&#39;RE UNITING MEME ENERGY, REAL-WORLD ACCESS, AND
-            UNSTOPPABLE COMMUNITY.
+          <p className="w-fit mx-auto [font-family:'Arial-Narrow',Helvetica] font-normal text-gray-200 text-base md:text-[17.6px] text-center tracking-[0] leading-relaxed md:leading-[28.2px] px-4 md:px-0">
+            Born from the spirit of ancient empires and forged in the fire of Web3, this project isn’t about charts — it’s about building a throne. We’re uniting meme energy, real-world access, and unstoppable community to create a living, breathing digital empire.
           </p>
         </div>
 

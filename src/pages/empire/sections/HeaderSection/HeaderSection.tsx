@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Button } from "../../../../components/ui/button";
 import {
   NavigationMenu,
@@ -8,9 +9,11 @@ import {
 } from "../../../../components/ui/navigation-menu";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "../../../../components/ui/sheet";
+import useIsMounted from "../../../../components/useIsMounted";
 
 export const HeaderSection = (): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
+  const mounted = useIsMounted();
 
   // Navigation items data with corresponding section IDs
   const navigationItems = [
@@ -94,13 +97,14 @@ export const HeaderSection = (): JSX.Element => {
           </Sheet>
         </div>
 
+        {mounted && <WalletMultiButton style={{backgroundColor: 'transparent'}} />}
         {/* Connect Wallet Button */}
-        <Button
+        {/* <Button
           variant="outline"
           className="hidden md:flex px-[17px] py-[9px] border border-solid border-[#a3ff12] rounded [font-family:'Arial-Bold',Helvetica] font-bold text-[#a3ff12] text-[13.3px]"
         >
           Connect Wallet
-        </Button>
+        </Button> */}
       </div>
     </header>
   );

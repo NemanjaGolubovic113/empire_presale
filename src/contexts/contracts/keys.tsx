@@ -15,6 +15,7 @@ import { PRESALE_PROGRAM_ID,
 const asyncGetPda = async (seeds: Array<Buffer | Uint8Array>, programId: PublicKey) => {
     const [pubKey, bump] = PublicKey.findProgramAddressSync(seeds, programId);
     return [pubKey, bump];
+    
 };
 
 export const getMainStateKey = async () => {
@@ -87,7 +88,7 @@ export const getVaultKey = async (presaleInfoKey: PublicKey) => {
         [
             Buffer.from(VAULT_SEED),
             presaleInfoKey.toBuffer(),
-            new Uint8Array([Number(PRESALE_ID)]),
+            // new Uint8Array([Number(PRESALE_ID)]),
         ],
         PRESALE_PROGRAM_ID
     );

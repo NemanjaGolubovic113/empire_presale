@@ -1,5 +1,6 @@
 import React from "react";
 import { BackgroundSection } from "./sections/BackgroundSection/BackgroundSection";
+import { useAnchorWallet } from "@solana/wallet-adapter-react";
 import { VisionSection } from "./sections/VisionSection";
 import { LeadershipSection } from "./sections/LeadershipSection";
 import { DivWrapperSection } from "./sections/DivWrapperSection";
@@ -9,8 +10,11 @@ import { OverviewSection } from "./sections/OverviewSection";
 import { FutureSection } from "./sections/FutureSection";
 import { MembershipSection } from "./sections/MembershipSection";
 import { PresaleSection } from "./sections/PresaleSection";
+import { AdminSection } from "./sections/AdminSection";
 
 export const Empire = (): JSX.Element => {
+  const walletCtx = useAnchorWallet();
+  const adminAddress = import.meta.env.VITE_PRESALE_ADMIN_ADDRESS;
   // Scrolling text content for the banner
   const scrollingText =
     "POWER • CULTURE • CHAOS • EMPIRE • BLOCKCHAIN • COMMUNITY • FUTURE";
@@ -21,7 +25,7 @@ export const Empire = (): JSX.Element => {
       <HeaderSection />
 
       <div className="relative w-full">
-        <BackgroundSection />
+        {/* <BackgroundSection /> */}
 
         <section id="overview">
           <OverviewSection />
@@ -64,6 +68,13 @@ export const Empire = (): JSX.Element => {
         <section id="future">
           <FutureSection />
         </section>
+
+        {/* {walletCtx?.publicKey.toBase58() === adminAddress && (
+          <section id="admin">
+            <AdminSection />
+          </section>
+        )} */}
+
       </div>
 
       <FooterSection />

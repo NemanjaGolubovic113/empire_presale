@@ -1,17 +1,10 @@
-import {
-  CheckIcon,
-  CrownIcon,
-  Share2Icon,
-  StarIcon,
-  ZapIcon,
-} from "lucide-react";
 import React from "react";
 import { Button } from "../../../../components/ui/button";
 import { Card, CardContent } from "../../../../components/ui/card";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useAnchorWallet } from "@solana/wallet-adapter-react";
-import { LAMPORTS_PER_SOL, Transaction, PublicKey } from '@solana/web3.js'
+import { LAMPORTS_PER_SOL, Transaction, PublicKey, VersionedTransaction } from '@solana/web3.js'
 import { NATIVE_MINT } from '@solana/spl-token'
 import {
   Token,
@@ -31,6 +24,7 @@ import TokenCalculator from "../../../../components/ui/TokenCalculator";
 import TokenPrice from "../../../../components/ui/TokenPrice";
 import PresaleProgress from "../../../../components/ui/PresaleProgress";
 import PaymentOptions from "../../../../components/ui/PaymentOptions";
+import { contract_buySol, contract_buyUsdc, contract_buyUsdt } from "../../../../contexts/contracts";
 
 const TokenIcon = () => (
   <span className="text-yellow-300 font-bold flex items-center justify-center w-6 h-6">
@@ -60,9 +54,9 @@ interface ContractContextType {
   buyUsdt: (amount: number) => Promise<any>;
   claimToken: () => Promise<any>;
   withdrawToken: () => Promise<any>;
-  withdrawSol: () => Promise<any>;
-  withdrawUsdt: () => Promise<any>;
-  withdrawUsdc: () => Promise<any>;
+  // withdrawSol: () => Promise<any>;
+  // withdrawUsdt: () => Promise<any>;
+  // withdrawUsdc: () => Promise<any>;
 }
 
 export const PresaleSection = (): JSX.Element => {
@@ -76,9 +70,10 @@ export const PresaleSection = (): JSX.Element => {
   ];
   const location = useLocation();
   const addr = location.pathname.split("/")[2];
+  const adminAddress = import.meta.env.VITE_PRESALE_ADMIN_ADDRESS;
 
   const walletCtx = useAnchorWallet();
-  const { withdrawUsdc } = useContract() as ContractContextType;
+  const { buySol, buyUsdc, buyUsdt, createPresale, updatePresale, depositToken, claimToken, withdrawToken } = useContract() as ContractContextType;
 
   const [isTradeDialogOpen, setIsTradeDialogOpen] = useState(false)
   const [amount, setAmount] = useState<string | ''>('');
@@ -90,6 +85,7 @@ export const PresaleSection = (): JSX.Element => {
   const [couponResult, setCouponResult] = useState<JSX.Element | null>(null);
   const [payAmount, setPayAmount] = useState<string>('1');
   const [receiveAmount, setReceiveAmount] = useState<string>('1.5');
+  const [depositTokenAmount, setDepositTokenAmount] = useState<string>('0');
 
   const [selectedPayment, setSelectedPayment] = useState('sol');
   
@@ -102,12 +98,12 @@ export const PresaleSection = (): JSX.Element => {
     { 
       id: 'usdt', 
       name: 'USDT',
-      icon: <img src="/usdt.webp" alt="USDT" className="w-6 h-6" />
+      icon: <img src="/usdt.png" alt="USDT" className="w-6 h-6" />
     },
     { 
       id: 'usdc', 
       name: 'USDC',
-      icon: <img src="/usdc.webp" alt="USDC" className="w-6 h-6" />
+      icon: <img src="/usdc.png" alt="USDC" className="w-6 h-6" />
     },
     { 
       id: 'card', 
@@ -155,6 +151,13 @@ export const PresaleSection = (): JSX.Element => {
     }
   };
 
+  const handleDepositTokenAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+      setDepositTokenAmount(value);
+    }
+  };
+
   const payment = getPaymentDetails();
 
 
@@ -164,27 +167,335 @@ export const PresaleSection = (): JSX.Element => {
     setAmount(e.target.value);
   };
 
-  const onTrade = () => {
+  const onTrade = async () => {
+    console.log("selectedPayment = ", selectedPayment, ", payAmount = ", payAmount)
     if (!walletCtx) {
       toast.error('No Wallet Connected!');
       return;
     }
 
-    if (Number(amount) == 0) {
+    if (parseFloat(amount) === 0) {
       toast.warning('Please input amount');
       return;
     }
 
-    let outputAmount = calculateOutputAmount(1);
+    const id = toast.loading(`Buying EMP...`);
+    try {
+      if (selectedPayment === 'sol') {
+        let tx = new Transaction().add(await buySol(parseFloat(payAmount) * LAMPORTS_PER_SOL));
+        const txHash = await send(connection, walletCtx, tx);
+        toast.dismiss(id);
+        if (txHash === "") {
+          toast.error('Create failed!');
+          return;
+        }
+        toast.success('Success!');
+      } else if (selectedPayment === 'usdt') {
+        let tx = new Transaction().add(await buyUsdt(Number(payAmount) * 10 ** TOKEN_DECIMALS));
+        const txHash = await send(connection, walletCtx, tx);
+        toast.dismiss(id);
+        if (txHash === "") {
+          toast.error('Create failed!');
+          return;
+        }
+        toast.success('Success!');
+      } else if (selectedPayment === 'usdc') {
+        let tx = new Transaction().add(await buyUsdc(Number(payAmount) * 10 ** TOKEN_DECIMALS));
+        const txHash = await send(connection, walletCtx, tx);
+        toast.dismiss(id);
+        if (txHash === "") {
+          toast.error('Create failed!');
+          return;
+        }
+        toast.success('Success!');
+      } else if (selectedPayment === 'card') {
+        toast.dismiss(id);
+        toast.success('Success!');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(id);
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    }
+
+    // let outputAmount = calculateOutputAmount(1);
 
     setIsTradeDialogOpen(true);
   };
 
-  const calculateOutputAmount = (percent: number) => {
-    // console.log("created === ", created);
-    const outputTokenAmount = Math.trunc((Number(amount) * (Number(created.realBaseReserves) + Number(created.virtBaseReserves)) / 10 ** TOKEN_DECIMALS) / ((Number(created.virtQuoteReserves) + Number(created.realQuoteReserves)) / LAMPORTS_PER_SOL + Number(amount)));
-    return outputTokenAmount * percent;
-  }
+  const onCreatePresale = async () => {
+    console.log("selectedPayment = ", selectedPayment, ", payAmount = ", payAmount)
+    if (!walletCtx) {
+      toast.error('No Wallet Connected!');
+      return;
+    }
+
+    if (walletCtx.publicKey.toBase58() !== adminAddress) {
+      toast.error('No admin wallet!');
+      return;
+    }
+
+    const hardcap = Number(import.meta.env.VITE_PRESALE_HARDCAP);
+    const ppt = Number(import.meta.env.VITE_PRESALE_PRICE_PER_TOKEN);
+    const pptn = Number(import.meta.env.VITE_PRESALE_PRICE_PER_TOKEN_NEXT);
+    const starttime = Number(import.meta.env.VITE_PRESALE_STARTTIME);
+    const endtime = Number(import.meta.env.VITE_PRESALE_ENDTIME);
+    const claimtime = Number(import.meta.env.VITE_PRESALE_CLAIMTIME);
+
+    const id = toast.loading(`Creating Presale ...`);
+    try {
+      let tx = null;
+      console.log(hardcap, ppt, pptn, starttime, endtime, claimtime)
+      tx = new Transaction().add(await createPresale(hardcap, ppt, pptn, starttime, endtime, claimtime));
+      // console.log("transaction ==== ", await connection.simulateTransaction(tx))
+      
+      const txHash = await send(connection, walletCtx, tx);
+      toast.dismiss(id);
+      if (txHash === "") {
+        toast.error('Create failed!');
+        return;
+      }
+      toast.success('Success!');
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(id);
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    }
+  };
+
+  const onUpdatePresale = async () => {
+    console.log("selectedPayment = ", selectedPayment, ", payAmount = ", payAmount)
+    if (!walletCtx) {
+      toast.error('No Wallet Connected!');
+      return;
+    }
+
+    if (walletCtx.publicKey.toBase58() !== adminAddress) {
+      toast.error('No admin wallet!');
+      return;
+    }
+
+    const uhardcap = import.meta.env.VITE_PRESALE_HARDCAP_UPDATE;
+    const uppt = import.meta.env.VITE_PRESALE_PRICE_PER_TOKEN_UPDATE;
+    const upptn = import.meta.env.VITE_PRESALE_PRICE_PER_TOKEN_NEXT_UPDATE;
+    const ustarttime = import.meta.env.VITE_PRESALE_STARTTIME_UPDATE;
+    const uendtime = import.meta.env.VITE_PRESALE_ENDTIME_UPDATE;
+    const uclaimtime = import.meta.env.VITE_PRESALE_CLAIMTIME_UPDATE;
+
+    const id = toast.loading(`Updating Presale ...`);
+    try {
+      let tx = null;
+      tx = new Transaction().add(await updatePresale(uppt, upptn, uhardcap, ustarttime, uendtime, uclaimtime));
+      const txHash = await send(connection, walletCtx, tx);
+      toast.dismiss(id);
+      if (txHash === "") {
+        toast.error('Update failed!');
+        return;
+      }
+      toast.success('Success!');
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(id);
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    }
+  };
+
+  const onDepositToken = async () => {
+    if (!walletCtx) {
+      toast.error('No Wallet Connected!');
+      return;
+    }
+
+    if (walletCtx.publicKey.toBase58() !== adminAddress) {
+      toast.error('No admin wallet!');
+      return;
+    }
+
+    const tokenamount = import.meta.env.VITE_DEPOSIT_TOKEN_AMOUNT;
+
+    const id = toast.loading(`Depositing tokens ...`);
+    try {
+      let tx = new Transaction().add(await depositToken(Number(depositTokenAmount)));
+      const txHash = await send(connection, walletCtx, tx);
+      toast.dismiss(id);
+      if (txHash === "") {
+        toast.error('Deposit failed!');
+        return;
+      }
+      toast.success('Success!');
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(id);
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    }
+  };
+
+  const onClaimToken = async () => {
+    if (!walletCtx) {
+      toast.error('No Wallet Connected!');
+      return;
+    }
+
+    const id = toast.loading(`Claiming tokens ...`);
+    try {
+      let tx = new Transaction().add(await claimToken());
+      const txHash = await send(connection, walletCtx, tx);
+      toast.dismiss(id);
+      if (txHash === "") {
+        toast.error('Claim failed!');
+        return;
+      }
+      toast.success('Success!');
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(id);
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    }
+  };
+
+  const onWithdrawToken = async () => {
+    if (!walletCtx) {
+      toast.error('No Wallet Connected!');
+      return;
+    }
+
+    if (walletCtx.publicKey.toBase58() !== adminAddress) {
+      toast.error('No admin wallet!');
+      return;
+    }
+
+    const id = toast.loading(`Withdrawing tokens ...`);
+    try {
+      let tx = new Transaction().add(await withdrawToken());
+      const txHash = await send(connection, walletCtx, tx);
+      toast.dismiss(id);
+      if (txHash === "") {
+        toast.error('Withdraw Token failed!');
+        return;
+      }
+      toast.success('Success!');
+    } catch (err) {
+      console.error(err);
+      toast.dismiss(id);
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error('An unknown error occurred.');
+      }
+    }
+  };
+
+  // const onWithdrawSol = async () => {
+  //   if (!walletCtx) {
+  //     toast.error('No Wallet Connected!');
+  //     return;
+  //   }
+
+  //   if (walletCtx.publicKey.toBase58() !== adminAddress) {
+  //     toast.error('No admin wallet!');
+  //     return;
+  //   }
+
+  //   const id = toast.loading(`Withdrawing sol ...`);
+  //   try {
+  //     await withdrawSol();
+  //     toast.dismiss(id);
+  //     toast.success('Success!');
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.dismiss(id);
+  //     if (err instanceof Error) {
+  //       toast.error(err.message);
+  //     } else {
+  //       toast.error('An unknown error occurred.');
+  //     }
+  //   }
+  // };
+
+  // const onWithdrawUSDC = async () => {
+  //   if (!walletCtx) {
+  //     toast.error('No Wallet Connected!');
+  //     return;
+  //   }
+
+  //   if (walletCtx.publicKey.toBase58() !== adminAddress) {
+  //     toast.error('No admin wallet!');
+  //     return;
+  //   }
+
+  //   const id = toast.loading(`Withdrawing USDC ...`);
+  //   try {
+  //     await withdrawUsdc();
+  //     toast.dismiss(id);
+  //     toast.success('Success!');
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.dismiss(id);
+  //     if (err instanceof Error) {
+  //       toast.error(err.message);
+  //     } else {
+  //       toast.error('An unknown error occurred.');
+  //     }
+  //   }
+  // };
+
+  // const onWithdrawUSDT = async () => {
+  //   if (!walletCtx) {
+  //     toast.error('No Wallet Connected!');
+  //     return;
+  //   }
+
+  //   if (walletCtx.publicKey.toBase58() !== adminAddress) {
+  //     toast.error('No admin wallet!');
+  //     return;
+  //   }
+
+  //   const id = toast.loading(`Withdrawing USDT ...`);
+  //   try {
+  //     await withdrawUsdt();
+  //     toast.dismiss(id);
+  //     toast.success('Success!');
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.dismiss(id);
+  //     if (err instanceof Error) {
+  //       toast.error(err.message);
+  //     } else {
+  //       toast.error('An unknown error occurred.');
+  //     }
+  //   }
+  // };
+
+
+
+
+
+
+  // const calculateOutputAmount = (percent: number) => {
+  //   // console.log("created === ", created);
+  //   const outputTokenAmount = Math.trunc((Number(amount) * (Number(created.realBaseReserves) + Number(created.virtBaseReserves)) / 10 ** TOKEN_DECIMALS) / ((Number(created.virtQuoteReserves) + Number(created.realQuoteReserves)) / LAMPORTS_PER_SOL + Number(amount)));
+  //   return outputTokenAmount * percent;
+  // }
 
 
   return (
@@ -203,7 +514,7 @@ export const PresaleSection = (): JSX.Element => {
 
         <div className="flex flex-wrap justify-center gap-8 mt-16">
           {/* Emperor Access Key Card */}
-          <Card className="w-[556px] border border-solid border-[#141625] shadow-[0px_0px_30px_#a3ff12] [background:linear-gradient(143deg,rgba(7,5,18,1)_0%,rgba(4,5,16,1)_100%)] rounded-xl relative">
+          <Card className="w-[365px] sm:w-[556px] border border-solid border-[#141625] shadow-[0px_0px_30px_#a3ff12] [background:linear-gradient(143deg,rgba(7,5,18,1)_0%,rgba(4,5,16,1)_100%)] rounded-xl relative">
             <CardContent className="p-8 flex flex-col items-center">
               <div className='flex flex-col gap-10 py-6'>
                 <PresaleProgress
@@ -244,7 +555,7 @@ export const PresaleSection = (): JSX.Element => {
                           className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 pl-3 pr-3 text-white focus:outline-none focus:ring-1 focus:ring-yellow-400/50"
                         />
                         <div className="absolute inset-y-0 right-8 flex items-center pl-3 pointer-events-none">
-                          <img src="/sol.png" alt="sol" className="rounded-full" />
+                          <img src={`/${selectedPayment}.png`} alt="sol" className="rounded-full" />
                         </div>
                       </div>
                     </div>
@@ -267,6 +578,75 @@ export const PresaleSection = (): JSX.Element => {
                 </div>
 
                 <button type='button' className="bg-[#a3ff12] hover:bg-[#a3ff12]/90 text-[#040510] [font-family:'Arial-Bold',Helvetica] rounded-md py-2 text-base font-bold mt-2" onClick={onTrade}>BUY</button>
+                <Button className="bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-base md:text-[17.6px] px-6 md:px-8 py-3 md:py-4 rounded" onClick={onClaimToken}>
+                  Claim Token
+                </Button>
+
+                {walletCtx?.publicKey.toBase58() === adminAddress && (
+                  <>
+                    <div className="flex justify-between w-full gap-3 mt-8 md:mt-10">
+                      <Button
+                        className="w-full bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-base md:text-[17.6px] px-6 md:px-8 py-3 md:py-4 rounded"
+                        onClick={onCreatePresale}
+                      >
+                        Create Presale
+                      </Button>
+              
+                      <Button
+                        className="w-full bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-base md:text-[17.6px] px-6 md:px-8 py-3 md:py-4 rounded"
+                        onClick={onUpdatePresale}
+                      >
+                        Update Presale
+                      </Button>
+                    </div>
+                    
+                    <div className="flex justify-between w-full gap-3">
+                      <input
+                        type="number"
+                        value={depositTokenAmount}
+                        onChange={handleDepositTokenAmountChange}
+                        className="w-full bg-gray-800 border border-gray-700 rounded pl-3 pr-3 text-white focus:outline-none focus:ring-1 focus:ring-yellow-400/50"
+                      />
+                      <Button
+                        className="w-full bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-base md:text-[17.6px] px-6 md:px-8 py-3 md:py-4 rounded"
+                        onClick={onDepositToken}
+                      >
+                        Deposit Token
+                      </Button>
+                    </div>
+                    
+
+                    {/* <div className="w-full gap-2"> */}
+                    <Button
+                      className="bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-base md:text-[17.6px] px-6 md:px-8 py-3 md:py-4 rounded"
+                      onClick={onWithdrawToken}
+                    >
+                      Withdraw Token
+                    </Button>
+              
+                      {/* <Button
+                        className="bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-sm px-6 md:px-8 py-3 md:py-4 rounded"
+                        onClick={onWithdrawSol}
+                      >
+                        Withdraw Sol
+                      </Button>
+              
+                      <Button
+                        className="bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-sm px-6 md:px-8 py-3 md:py-4 rounded"
+                        onClick={onWithdrawUSDT}
+                      >
+                        Withdraw USDT
+                      </Button>
+              
+                      <Button
+                        className="bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] [font-family:'Arial-Bold',Helvetica] font-bold text-sm px-6 md:px-8 py-3 md:py-4 rounded"
+                        onClick={onWithdrawUSDC}
+                      >
+                        Withdraw USDC
+                      </Button> */}
+                    {/* </div> */}
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>

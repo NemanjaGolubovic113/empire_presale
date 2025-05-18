@@ -67,12 +67,12 @@ export const TokenPage = (): JSX.Element => {
     { 
       id: 'usdt', 
       name: 'USDT',
-      icon: <img src="/usdt.webp" alt="USDT" className="w-6 h-6" />
+      icon: <img src="/usdt.png" alt="USDT" className="w-6 h-6" />
     },
     { 
       id: 'usdc', 
       name: 'USDC',
-      icon: <img src="/usdc.webp" alt="USDC" className="w-6 h-6" />
+      icon: <img src="/usdc.png" alt="USDC" className="w-6 h-6" />
     },
     { 
       id: 'card', 

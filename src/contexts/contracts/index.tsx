@@ -20,7 +20,8 @@ import { PRESALE_PROGRAM_ID,
     USDC_ADDRESS,
     USDT_ADDRESS,
     TOKEN_MINT_ADDRESS,
-    PRESALE_ADMIN_ADDRESS
+    PRESALE_ADMIN_ADDRESS,
+    PRESALE_VAULT_ADDRESS
 } from './constants';
 import { IDL } from './idl';
 import * as Keys from './keys';
@@ -85,12 +86,6 @@ export const contract_getUserInfo = async (walletCtx: AnchorWallet | undefined, 
     return await program.account.userInfo.fetch(userInfoKey);
 };
 
-
-
-
-
-
-
 export const contract_createPresale = async (
     walletCtx: AnchorWallet,
     hardcapAmount: number,
@@ -106,37 +101,42 @@ export const contract_createPresale = async (
     }
 
     const program = getProgram(walletCtx);
+    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS);
     
-    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+    const presaleInfoKey = await Keys.getPresaleInfoKey(presaleAdminKey);
     if (!(presaleInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
     }
+    console.log("presaleinfo === ", presaleInfoKey.toBase58());
 
-    const vaultKey = await Keys.getVaultKey(presaleInfoKey);
-    if (!(vaultKey instanceof PublicKey)) {
-        throw new Error("Invalid vaultKey: must be a PublicKey");
-    }
+    // const vaultKey = await Keys.getVaultKey(presaleInfoKey);
+    // if (!(vaultKey instanceof PublicKey)) {
+    //     throw new Error("Invalid vaultKey: must be a PublicKey");
+    // }
+
+    console.log("program === ", program.idl)
     
     const ix = await program.methods
-        .createPresale({
-            hardcapAmount: new BN(hardcapAmount),
-            pricePerToken: new BN(pricePerToken),
-            pricePerTokenNext: new BN(pricePerTokenNext),
-            startTime: new BN(startTime),
-            endTime: new BN(endTime),
-            claimTime: new BN(claimTime),
-            identifier: new BN(Number(PRESALE_ID))
-        })
+        .createPresale(
+            new BN(hardcapAmount * 10 ** 9),
+            new BN(pricePerToken * 10 ** 9),
+            new BN(pricePerTokenNext * 10 ** 9),
+            new BN(startTime),
+            new BN(endTime),
+            new BN(claimTime),
+            new BN(Number(PRESALE_ID))
+        )
         .accounts({
-            presaleInfo: presaleInfoKey,
-            authority: walletCtx.publicKey,
-            usdtMint: new PublicKey(USDT_ADDRESS),
-            usdcMint: new PublicKey(USDC_ADDRESS),
-            vault: vaultKey,
-            systemProgram: SystemProgram.programId
+             presaleInfo: presaleInfoKey,
+             authority: walletCtx.publicKey,
+             usdtMint: new PublicKey(USDT_ADDRESS),
+             usdcMint: new PublicKey(USDC_ADDRESS),
+             vault: new PublicKey(PRESALE_VAULT_ADDRESS),
+             systemProgram: SystemProgram.programId
         })
         .instruction();
 
+    console.log("ix = ", ix);
     return ix;
 };
 
@@ -155,22 +155,23 @@ export const contract_updatePresale = async (
     }
 
     const program = getProgram(walletCtx);
+    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS);
     
-    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+    const presaleInfoKey = await Keys.getPresaleInfoKey(presaleAdminKey);
     if (!(presaleInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
     }
 
     const ix = await program.methods
-        .updatePresale({
-            pricePerToken: new BN(pricePerToken),
-            pricePerTokenNext: new BN(pricePerTokenNext),
-            hardcapAmount: new BN(hardcapAmount),
-            startTime: new BN(startTime),
-            endTime: new BN(endTime),
-            claimTime: new BN(claimTime),
-            identifier: new BN(Number(PRESALE_ID))
-        })
+        .updatePresale(
+            new BN(pricePerToken),
+            new BN(pricePerTokenNext),
+            new BN(hardcapAmount),
+            new BN(startTime),
+            new BN(endTime),
+            new BN(claimTime),
+            new BN(Number(PRESALE_ID))
+        )
         .accounts({
             presaleInfo: presaleInfoKey,
             authority: walletCtx.publicKey,
@@ -193,8 +194,9 @@ export const contract_depositToken = async (
     }
 
     const program = getProgram(walletCtx);
+    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS);
     
-    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+    const presaleInfoKey = await Keys.getPresaleInfoKey(presaleAdminKey);
     if (!(presaleInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
     }
@@ -211,14 +213,14 @@ export const contract_depositToken = async (
         });
 
     const ix = await program.methods
-        .depositToken({
-            amount: new BN(amount),
-            identifier: new BN(Number(PRESALE_ID))
-        })
+        .depositToken(
+            new BN(amount * 10 ** TOKEN_DECIMALS),
+            new BN(Number(PRESALE_ID))
+        )
         .accounts({
             mintAccount: new PublicKey(TOKEN_MINT_ADDRESS),
             fromAssociatedTokenAccount,
-            fromAuthority: new PublicKey(PRESALE_ADMIN_ADDRESS),
+            fromAuthority: walletCtx.publicKey,
             toAssociatedTokenAccount,
             presaleInfo: presaleInfoKey,
             payer: walletCtx.publicKey,
@@ -242,13 +244,13 @@ export const contract_buySol = async (
     }
 
     const program = getProgram(walletCtx);
-    
-    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
+
+    const presaleInfoKey = await Keys.getPresaleInfoKey(presaleAdminKey);
     if (!(presaleInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
     }
 
-    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
     const userInfoKey = await Keys.getUserInfoKey(presaleAdminKey, walletCtx.publicKey);
     if (!(userInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid userInfoKey or Program: must be a PublicKey");
@@ -258,17 +260,18 @@ export const contract_buySol = async (
     const buyerTokenAccount = getAssociatedTokenAddressSync(mintKey, walletCtx.publicKey);
     const presaleTokenAccount = getAssociatedTokenAddressSync(mintKey, presaleInfoKey);
 
-    const vaultKey = await Keys.getVaultKey(presaleInfoKey);
-    if (!(vaultKey instanceof PublicKey)) {
-        throw new Error("Invalid vaultKey: must be a PublicKey");
-    }
+    // const vaultKey = await Keys.getVaultKey(presaleInfoKey);
+    // if (!(vaultKey instanceof PublicKey)) {
+    //     throw new Error("Invalid vaultKey: must be a PublicKey");
+    // }
 
+    console.log("")
     const solUsdPriceFeedAccount =new PublicKey("7UVimffxr9ow1uXYxsr4LHAcV58mLzhmwaeKvJ1pjLiE")
     const ix = await program.methods
-        .buySol({
-            quoteAmount: new BN(amount),
-            identifier: new BN(Number(PRESALE_ID))
-        })
+        .buySol(
+            new BN(amount),
+            new BN(Number(PRESALE_ID))
+        )
         .accounts({
             presaleInfo: presaleInfoKey,
             mintAccount: mintKey,
@@ -277,7 +280,7 @@ export const contract_buySol = async (
             priceUpdate: solUsdPriceFeedAccount,
             presaleAuthority: presaleAdminKey,
             userInfo: userInfoKey,
-            vault: vaultKey,
+            vault: new PublicKey(PRESALE_VAULT_ADDRESS),
             buyer: walletCtx.publicKey,
             rent: anchor.web3.SYSVAR_RENT_PUBKEY,
             systemProgram: SystemProgram.programId,
@@ -286,6 +289,7 @@ export const contract_buySol = async (
         })
         .instruction();
 
+    console.log("instruction ==== ", ix)
     return ix;
 };
 
@@ -299,13 +303,14 @@ export const contract_buyUsdc = async (
     }
 
     const program = getProgram(walletCtx);
+
+    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
     
-    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+    const presaleInfoKey = await Keys.getPresaleInfoKey(presaleAdminKey);
     if (!(presaleInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
     }
 
-    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
     const userInfoKey = await Keys.getUserInfoKey(presaleAdminKey, walletCtx.publicKey);
     if (!(userInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid userInfoKey or Program: must be a PublicKey");
@@ -325,10 +330,10 @@ export const contract_buyUsdc = async (
     const usdcVault = getAssociatedTokenAddressSync(usdcMint, vaultKey);
 
     const ix = await program.methods
-        .buyUsdc({
-            quoteAmount: new BN(amount),
-            identifier: new BN(Number(PRESALE_ID))
-        })
+        .buyUsdc(
+            new BN(amount),
+            new BN(Number(PRESALE_ID))
+        )
         .accounts({
             presaleInfo: presaleInfoKey,
             mintAccount: mintKey,
@@ -337,7 +342,7 @@ export const contract_buyUsdc = async (
             usdcMint,
             presaleAuthority: presaleAdminKey,
             userInfo: userInfoKey,
-            vault: vaultKey,
+            // vault: vaultKey,
             usdcAssociatedTokenAccount,
             usdcVault,
             buyer: walletCtx.publicKey,
@@ -361,13 +366,13 @@ export const contract_buyUsdt = async (
     }
 
     const program = getProgram(walletCtx);
+    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
     
-    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+    const presaleInfoKey = await Keys.getPresaleInfoKey(presaleAdminKey);
     if (!(presaleInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
     }
 
-    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
     const userInfoKey = await Keys.getUserInfoKey(presaleAdminKey, walletCtx.publicKey);
     if (!(userInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid userInfoKey or Program: must be a PublicKey");
@@ -387,10 +392,10 @@ export const contract_buyUsdt = async (
     const usdtVault = getAssociatedTokenAddressSync(usdtMint, vaultKey);
 
     const ix = await program.methods
-        .buyUsdt({
-            quoteAmount: new BN(amount),
-            identifier: new BN(Number(PRESALE_ID))
-        })
+        .buyUsdt(
+            new BN(amount),
+            new BN(Number(PRESALE_ID))
+        )
         .accounts({
             presaleInfo: presaleInfoKey,
             mintAccount: mintKey,
@@ -399,7 +404,7 @@ export const contract_buyUsdt = async (
             usdtMint,
             presaleAuthority: presaleAdminKey,
             userInfo: userInfoKey,
-            vault: vaultKey,
+            // vault: vaultKey,
             usdtAssociatedTokenAccount,
             usdtVault,
             buyer: walletCtx.publicKey,
@@ -422,13 +427,13 @@ export const contract_claimToken = async (
     }
 
     const program = getProgram(walletCtx);
+    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
     
-    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+    const presaleInfoKey = await Keys.getPresaleInfoKey(presaleAdminKey);
     if (!(presaleInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
     }
 
-    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
     const userInfoKey = await Keys.getUserInfoKey(presaleAdminKey, walletCtx.publicKey);
     if (!(userInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid userInfoKey or Program: must be a PublicKey");
@@ -439,9 +444,9 @@ export const contract_claimToken = async (
     const presaleTokenAccount = getAssociatedTokenAddressSync(mintKey, presaleInfoKey);
 
     const ix = await program.methods
-        .claimToken({
-            identifier: new BN(Number(PRESALE_ID))
-        })
+        .claimToken(
+            new BN(Number(PRESALE_ID))
+        )
         .accounts({
             mintAccount: mintKey,
             buyerTokenAccount,
@@ -469,13 +474,13 @@ export const contract_withdrawToken = async (
     }
 
     const program = getProgram(walletCtx);
+    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
     
-    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+    const presaleInfoKey = await Keys.getPresaleInfoKey(presaleAdminKey);
     if (!(presaleInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
     }
 
-    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
     const userInfoKey = await Keys.getUserInfoKey(presaleAdminKey, walletCtx.publicKey);
     if (!(userInfoKey instanceof PublicKey) || !program) {
         throw new Error("Invalid userInfoKey or Program: must be a PublicKey");
@@ -486,9 +491,9 @@ export const contract_withdrawToken = async (
     const presalePresaleTokenAssociatedTokenAccount = getAssociatedTokenAddressSync(mintKey, presaleInfoKey);
 
     const ix = await program.methods
-        .withdrawToken({
-            identifier: new BN(Number(PRESALE_ID))
-        })
+        .withdrawToken(
+            new BN(Number(PRESALE_ID))
+        )
         .accounts({
             presaleTokenMintAccount: mintKey,
             buyerPresaleTokenAssociatedTokenAccount,
@@ -506,150 +511,150 @@ export const contract_withdrawToken = async (
     return ix;
 };
 
-export const contract_withdrawSol = async (
-    walletCtx: AnchorWallet,
-) => {
-    if (!walletCtx) {
-        console.error("Invalid wallet");
-        throw new WalletNotConnectedError();
-    }
+// export const contract_withdrawSol = async (
+//     walletCtx: AnchorWallet,
+// ) => {
+//     if (!walletCtx) {
+//         console.error("Invalid wallet");
+//         throw new WalletNotConnectedError();
+//     }
 
-    const program = getProgram(walletCtx);
+//     const program = getProgram(walletCtx);
     
-    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
-    if (!(presaleInfoKey instanceof PublicKey) || !program) {
-        throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
-    }
+//     const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+//     if (!(presaleInfoKey instanceof PublicKey) || !program) {
+//         throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
+//     }
 
-    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
-    const userInfoKey = await Keys.getUserInfoKey(presaleAdminKey, walletCtx.publicKey);
-    if (!(userInfoKey instanceof PublicKey) || !program) {
-        throw new Error("Invalid userInfoKey or Program: must be a PublicKey");
-    }
+//     const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
+//     const userInfoKey = await Keys.getUserInfoKey(presaleAdminKey, walletCtx.publicKey);
+//     if (!(userInfoKey instanceof PublicKey) || !program) {
+//         throw new Error("Invalid userInfoKey or Program: must be a PublicKey");
+//     }
 
-    const vaultKey = await Keys.getVaultKey(presaleInfoKey);
-    if (!(vaultKey instanceof PublicKey)) {
-        throw new Error("Invalid vaultKey: must be a PublicKey");
-    }
+//     const vaultKey = await Keys.getVaultKey(presaleInfoKey);
+//     if (!(vaultKey instanceof PublicKey)) {
+//         throw new Error("Invalid vaultKey: must be a PublicKey");
+//     }
 
-    const ix = await program.methods
-        .withdrawSol({
-            identifier: new BN(Number(PRESALE_ID))
-        })
-        .accounts({
-            presaleInfo: presaleInfoKey,
-            vault: vaultKey,
-            presaleAuthority: presaleAdminKey,
-            buyer: walletCtx.publicKey,
-            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-            systemProgram: SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID, 
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-        })
-        .instruction();
+//     const ix = await program.methods
+//         .withdrawSol(
+//             new BN(Number(PRESALE_ID))
+//         )
+//         .accounts({
+//             presaleInfo: presaleInfoKey,
+//             vault: vaultKey,
+//             presaleAuthority: presaleAdminKey,
+//             buyer: walletCtx.publicKey,
+//             rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+//             systemProgram: SystemProgram.programId,
+//             tokenProgram: TOKEN_PROGRAM_ID, 
+//             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+//         })
+//         .instruction();
 
-    return ix;
-};
+//     return ix;
+// };
 
-export const contract_withdrawUsdt = async (
-    walletCtx: AnchorWallet,
-) => {
-    if (!walletCtx) {
-        console.error("Invalid wallet");
-        throw new WalletNotConnectedError();
-    }
+// export const contract_withdrawUsdt = async (
+//     walletCtx: AnchorWallet,
+// ) => {
+//     if (!walletCtx) {
+//         console.error("Invalid wallet");
+//         throw new WalletNotConnectedError();
+//     }
 
-    const program = getProgram(walletCtx);
+//     const program = getProgram(walletCtx);
     
-    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
-    if (!(presaleInfoKey instanceof PublicKey) || !program) {
-        throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
-    }
+//     const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+//     if (!(presaleInfoKey instanceof PublicKey) || !program) {
+//         throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
+//     }
 
-    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
-    const userInfoKey = await Keys.getUserInfoKey(presaleAdminKey, walletCtx.publicKey);
-    if (!(userInfoKey instanceof PublicKey) || !program) {
-        throw new Error("Invalid userInfoKey or Program: must be a PublicKey");
-    }
+//     const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
+//     const userInfoKey = await Keys.getUserInfoKey(presaleAdminKey, walletCtx.publicKey);
+//     if (!(userInfoKey instanceof PublicKey) || !program) {
+//         throw new Error("Invalid userInfoKey or Program: must be a PublicKey");
+//     }
 
-    const vaultKey = await Keys.getVaultKey(presaleInfoKey);
-    if (!(vaultKey instanceof PublicKey)) {
-        throw new Error("Invalid vaultKey: must be a PublicKey");
-    }
-    const usdtMint = new PublicKey(USDT_ADDRESS);
-    const usdtAssociatedTokenAccount = getAssociatedTokenAddressSync(usdtMint, walletCtx.publicKey);
-    const usdtVault = getAssociatedTokenAddressSync(usdtMint, vaultKey);
+//     const vaultKey = await Keys.getVaultKey(presaleInfoKey);
+//     if (!(vaultKey instanceof PublicKey)) {
+//         throw new Error("Invalid vaultKey: must be a PublicKey");
+//     }
+//     const usdtMint = new PublicKey(USDT_ADDRESS);
+//     const usdtAssociatedTokenAccount = getAssociatedTokenAddressSync(usdtMint, walletCtx.publicKey);
+//     const usdtVault = getAssociatedTokenAddressSync(usdtMint, vaultKey);
 
-    const ix = await program.methods
-        .withdrawUsdt({
-            identifier: new BN(Number(PRESALE_ID))
-        })
-        .accounts({
-            presaleInfo: presaleInfoKey,
-            usdtMint,
-            vault: vaultKey,
-            usdtAssociatedTokenAccount,
-            usdtVault,
-            presaleAuthority: presaleAdminKey,
-            buyer: walletCtx.publicKey,
-            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-            systemProgram: SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID, 
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-        })
-        .instruction();
+//     const ix = await program.methods
+//         .withdrawUsdt(
+//             new BN(Number(PRESALE_ID))
+//         )
+//         .accounts({
+//             presaleInfo: presaleInfoKey,
+//             usdtMint,
+//             vault: vaultKey,
+//             usdtAssociatedTokenAccount,
+//             usdtVault,
+//             presaleAuthority: presaleAdminKey,
+//             buyer: walletCtx.publicKey,
+//             rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+//             systemProgram: SystemProgram.programId,
+//             tokenProgram: TOKEN_PROGRAM_ID, 
+//             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+//         })
+//         .instruction();
 
-    return ix;
-};
+//     return ix;
+// };
 
-export const contract_withdrawUsdc = async (
-    walletCtx: AnchorWallet,
-) => {
-    if (!walletCtx) {
-        console.error("Invalid wallet");
-        throw new WalletNotConnectedError();
-    }
+// export const contract_withdrawUsdc = async (
+//     walletCtx: AnchorWallet,
+// ) => {
+//     if (!walletCtx) {
+//         console.error("Invalid wallet");
+//         throw new WalletNotConnectedError();
+//     }
 
-    const program = getProgram(walletCtx);
+//     const program = getProgram(walletCtx);
     
-    const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
-    if (!(presaleInfoKey instanceof PublicKey) || !program) {
-        throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
-    }
+//     const presaleInfoKey = await Keys.getPresaleInfoKey(walletCtx.publicKey);
+//     if (!(presaleInfoKey instanceof PublicKey) || !program) {
+//         throw new Error("Invalid presaleInfoKey or Program: must be a PublicKey");
+//     }
 
-    const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
-    const userInfoKey = await Keys.getUserInfoKey(presaleAdminKey, walletCtx.publicKey);
-    if (!(userInfoKey instanceof PublicKey) || !program) {
-        throw new Error("Invalid userInfoKey or Program: must be a PublicKey");
-    }
+//     const presaleAdminKey = new PublicKey(PRESALE_ADMIN_ADDRESS)
+//     const userInfoKey = await Keys.getUserInfoKey(presaleAdminKey, walletCtx.publicKey);
+//     if (!(userInfoKey instanceof PublicKey) || !program) {
+//         throw new Error("Invalid userInfoKey or Program: must be a PublicKey");
+//     }
 
-    const vaultKey = await Keys.getVaultKey(presaleInfoKey);
-    if (!(vaultKey instanceof PublicKey)) {
-        throw new Error("Invalid vaultKey: must be a PublicKey");
-    }
+//     const vaultKey = await Keys.getVaultKey(presaleInfoKey);
+//     if (!(vaultKey instanceof PublicKey)) {
+//         throw new Error("Invalid vaultKey: must be a PublicKey");
+//     }
 
-    const usdcMint = new PublicKey(USDC_ADDRESS);
-    const usdcAssociatedTokenAccount = getAssociatedTokenAddressSync(usdcMint, walletCtx.publicKey);
-    const usdcVault = getAssociatedTokenAddressSync(usdcMint, vaultKey);
+//     const usdcMint = new PublicKey(USDC_ADDRESS);
+//     const usdcAssociatedTokenAccount = getAssociatedTokenAddressSync(usdcMint, walletCtx.publicKey);
+//     const usdcVault = getAssociatedTokenAddressSync(usdcMint, vaultKey);
 
-    const ix = await program.methods
-        .withdrawUsdc({
-            identifier: new BN(Number(PRESALE_ID))
-        })
-        .accounts({
-            presaleInfo: presaleInfoKey,
-            usdcMint,
-            vault: vaultKey,
-            usdcAssociatedTokenAccount,
-            usdcVault,
-            presaleAuthority: presaleAdminKey,
-            buyer: walletCtx.publicKey,
-            rent: anchor.web3.SYSVAR_RENT_PUBKEY,
-            systemProgram: SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID, 
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-        })
-        .instruction();
+//     const ix = await program.methods
+//         .withdrawUsdc(
+//             new BN(Number(PRESALE_ID))
+//         )
+//         .accounts({
+//             presaleInfo: presaleInfoKey,
+//             usdcMint,
+//             vault: vaultKey,
+//             usdcAssociatedTokenAccount,
+//             usdcVault,
+//             presaleAuthority: presaleAdminKey,
+//             buyer: walletCtx.publicKey,
+//             rent: anchor.web3.SYSVAR_RENT_PUBKEY,
+//             systemProgram: SystemProgram.programId,
+//             tokenProgram: TOKEN_PROGRAM_ID, 
+//             associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+//         })
+//         .instruction();
 
-    return ix;
-};
+//     return ix;
+// };

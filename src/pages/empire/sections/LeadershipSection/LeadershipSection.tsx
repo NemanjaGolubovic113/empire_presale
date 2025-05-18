@@ -4,13 +4,13 @@ import { Card, CardContent } from "../../../../components/ui/card";
 export const LeadershipSection = (): JSX.Element => {
   const founders = [
     {
-      name: "Alexander Crown",
+      name: "@Thee7mod",
       role: "Visionary & Strategist",
       bio: "Former hedge fund manager with 10+ years in traditional finance before pivoting to crypto in 2016.",
       image: "/alexander-crown.png",
     },
     {
-      name: "Marcus Imperium",
+      name: "@Cryptomilad_",
       role: "Technical Architect",
       bio: "Blockchain developer since 2015. Contributed to multiple top 50 cryptocurrency projects.",
       image: "/marcus-imperium.png",
