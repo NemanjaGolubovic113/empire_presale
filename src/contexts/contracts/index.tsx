@@ -15,7 +15,6 @@ import { NATIVE_MINT,
 import BN from 'bn.js';
 
 import { PRESALE_PROGRAM_ID, 
-    FEE_PRE_DIV,
     PRESALE_ID,
     USDC_ADDRESS,
     USDT_ADDRESS,

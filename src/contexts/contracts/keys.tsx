@@ -3,8 +3,6 @@ import { TOKEN_PROGRAM_ID,
     ASSOCIATED_TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
 import { PRESALE_PROGRAM_ID, 
-    MAINSTATE_PREFIX_SEED, 
-    POOLSTATE_PREFIX_SEED,
     USER_INFO_SEED,
     VAULT_SEED,
     PRESALE_SEED,
@@ -16,24 +14,6 @@ const asyncGetPda = async (seeds: Array<Buffer | Uint8Array>, programId: PublicK
     const [pubKey, bump] = PublicKey.findProgramAddressSync(seeds, programId);
     return [pubKey, bump];
     
-};
-
-export const getMainStateKey = async () => {
-    const [mainStateKey] = await asyncGetPda([Buffer.from(MAINSTATE_PREFIX_SEED)], 
-        PRESALE_PROGRAM_ID
-    );
-    return mainStateKey;
-};
-
-export const getPoolStateKey = async (baseMint: PublicKey, quoteMint: PublicKey) => {
-    const [poolStateKey] = await asyncGetPda(
-        [
-            Buffer.from(POOLSTATE_PREFIX_SEED), 
-            baseMint.toBuffer(), 
-        ], 
-        PRESALE_PROGRAM_ID
-    );
-    return poolStateKey;
 };
 
 // export const getUserInfoKey = async (poolKey: PublicKey, buyerKey: PublicKey) => {
