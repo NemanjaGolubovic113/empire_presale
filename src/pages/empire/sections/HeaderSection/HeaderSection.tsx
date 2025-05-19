@@ -20,7 +20,7 @@ export const HeaderSection = (): JSX.Element => {
     { label: "Overview", href: "#overview" },
     { label: "Vision", href: "#vision" },
     { label: "Membership", href: "#membership" },
-    { label: "Presale", href: "#presale" },
+    // { label: "Presale", href: "#presale" },
     { label: "Leadership", href: "#leadership" },
     { label: "Future", href: "#future" },
   ];

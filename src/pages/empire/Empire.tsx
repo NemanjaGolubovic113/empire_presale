@@ -57,9 +57,9 @@ export const Empire = (): JSX.Element => {
 
         <DivWrapperSection />
 
-        <section id="presale">
+        {/* <section id="presale">
           <PresaleSection />
-        </section>
+        </section> */}
 
         <section id="leadership">
           <LeadershipSection />

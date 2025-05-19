@@ -195,11 +195,6 @@ export const PresaleSection = (): JSX.Element => {
 
 
 
-  const onChangeAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (Number(e.target.value) < 0) return;
-    setAmount(e.target.value);
-  };
-
   const onTrade = async () => {
     console.log("selectedPayment = ", selectedPayment, ", payAmount = ", payAmount)
     if (!walletCtx) {
@@ -436,23 +431,22 @@ export const PresaleSection = (): JSX.Element => {
 
 
   return (
-    <section className="flex flex-col items-center py-24 w-full [background:linear-gradient(180deg,rgba(4,5,16,1)_0%,rgba(7,5,18,1)_100%)]">
+    <section className="flex flex-col items-center py-24 w-full">
       <div className="relative max-w-[1200px] w-full">
-        <h2
-          className="w-80 mx-auto [background:linear-gradient(90deg,rgba(163,255,18,1)_0%,rgba(197,255,107,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'Arial-Bold',Helvetica] font-bold text-transparent text-[40px] text-center tracking-[0] leading-[48px] whitespace-nowrap"
-          style={{
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            WebkitTextFillColor: "transparent"
-          }}
-        >
-          Presale Live
-        </h2>
-
         <div className="flex flex-wrap justify-center gap-8 mt-16">
           {/* Emperor Access Key Card */}
           <Card className="w-[365px] sm:w-[556px] border border-solid border-[#141625] shadow-[0px_0px_30px_#a3ff12] [background:linear-gradient(143deg,rgba(7,5,18,1)_0%,rgba(4,5,16,1)_100%)] rounded-xl relative">
             <CardContent className="p-8 flex flex-col items-center">
+              <h2
+                className="w-80 mx-auto [background:linear-gradient(90deg,rgba(163,255,18,1)_0%,rgba(197,255,107,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'Arial-Bold',Helvetica] font-bold text-transparent text-[40px] text-center tracking-[0] leading-[48px] whitespace-nowrap"
+                style={{
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                  WebkitTextFillColor: "transparent"
+                }}
+              >
+                Presale Live
+              </h2>
               <div className='flex flex-col gap-10 py-6 w-full'>
                 <PresaleProgress
                   percentageSold={presaleInfo?.totalAmount / LAMPORTS_PER_SOL}
