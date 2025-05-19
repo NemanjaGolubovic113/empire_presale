@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface PresaleProgressProps {
   percentageSold: number;
@@ -12,7 +12,22 @@ const PresaleProgress: React.FC<PresaleProgressProps> = ({
   tokensSold 
 }) => {
   const hardcapUsd = Number(import.meta.env.VITE_PRESALE_HARDCAP_USD_AMOUNT);
-  const soldPercent = percentageSold / hardcapUsd * 100;
+  const [soldPercent, setSoldPercent] = useState(0);
+  const [totalRaisedAmount, setTotalRaisedAmount] = useState(0);
+  const [tokensSoldAmount, setTokensSoldAmount] = useState(0);
+
+  if (percentageSold) {
+    setSoldPercent(percentageSold / hardcapUsd * 100);
+  }
+
+  if (totalRaised) {
+    setTotalRaisedAmount(totalRaised);
+  }
+
+  if (tokensSold) {
+    setTokensSoldAmount(tokensSold);
+  }
+
   return (
     <div className="flex flex-col items-center w-full space-y-2">
       <div className="relative w-full h-8 rounded bg-white">
@@ -36,8 +51,8 @@ const PresaleProgress: React.FC<PresaleProgressProps> = ({
       </div>
       
       <div className="flex flex-col items-center text-center space-y-1">
-        <p className="text-sm text-gray-300">USD RAISED : ${totalRaised.toLocaleString()} / ${hardcapUsd.toLocaleString()}</p>
-        <p className="text-sm text-gray-300">Tokens Sold : {tokensSold.toLocaleString()}</p>
+        <p className="text-sm text-gray-300">USD RAISED : ${totalRaisedAmount.toLocaleString()} / ${hardcapUsd.toLocaleString()}</p>
+        <p className="text-sm text-gray-300">Tokens Sold : {tokensSoldAmount.toLocaleString()}</p>
       </div>
     </div>
   );
