@@ -5,22 +5,18 @@ import { PresaleSection } from "../PresaleSection";
 
 export const OverviewSection = (): JSX.Element => {
   return (
-    <div className="flex flex-col lg:flex-row pt-40 relative items-center justify-center">
+    <div className="flex pt-40 relative items-center justify-center">
       {/* Background image with overlay */}
       <div className="absolute inset-0 bg-[url(..//section.png)] bg-cover bg-center" />
       <div className="absolute inset-0 bg-gradient-to-b from-[rgba(4,5,16,0.3)] to-[rgba(4,5,16,0.6)]" />
-      <section className="relative w-full py-6 flex items-center justify-center px-4 md:px-0">
+      {/* <section className="relative w-full py-6 flex items-center justify-center px-4 md:px-0">
 
-        {/* Content container */}
         <Card className="relative max-w-[800px] border-none bg-transparent">
           <CardContent className="flex flex-col items-center justify-center p-0">
-            {/* Icon placeholder */}
             <div className="w-[72px] h-16 text-[#a3ff12] text-[64px] text-center leading-[64px] font-normal tracking-[0] whitespace-nowrap mb-11">
-              {/* Icon content */}
               <img src="/king.svg" alt="king" />
             </div>
 
-            {/* Main heading with gradient */}
             <h1
               className="w-full max-w-[738px] mb-6 text-4xl md:text-[64px] text-center font-bold leading-tight md:leading-[76.8px] tracking-[0] px-4 md:px-0"
               style={{
@@ -35,7 +31,6 @@ export const OverviewSection = (): JSX.Element => {
               Welcome To The Empire
             </h1>
 
-            {/* Subheading */}
             <p
               className="max-w-[444px] mb-12 md:mb-[119px] font-normal text-lg md:text-2xl text-center leading-relaxed md:leading-[38.4px] text-gray-300 px-4 md:px-0"
               style={{ fontFamily: "'Arial-Narrow', Helvetica" }}
@@ -47,7 +42,6 @@ export const OverviewSection = (): JSX.Element => {
               Not Just A Meme — A Movement.
             </p>
 
-            {/* CTA Button */}
             <Button
               className="bg-[#a3ff12] hover:bg-[#8fe00f] text-[#040510] px-6 md:px-8 py-3 md:py-4 rounded text-base md:text-[17.6px]"
               style={{ fontFamily: "'Arial-Bold', Helvetica" }}
@@ -56,7 +50,7 @@ export const OverviewSection = (): JSX.Element => {
             </Button>
           </CardContent>
         </Card>
-      </section>
+      </section> */}
       <PresaleSection />
     </div>
     

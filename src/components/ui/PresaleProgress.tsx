@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface PresaleProgressProps {
   percentageSold: number;
@@ -16,17 +16,20 @@ const PresaleProgress: React.FC<PresaleProgressProps> = ({
   const [totalRaisedAmount, setTotalRaisedAmount] = useState(0);
   const [tokensSoldAmount, setTokensSoldAmount] = useState(0);
 
-  if (percentageSold) {
-    setSoldPercent(percentageSold / hardcapUsd * 100);
-  }
+  useEffect(() => {
+    if (percentageSold) {
+      setSoldPercent(percentageSold / hardcapUsd * 100);
+    }
 
-  if (totalRaised) {
-    setTotalRaisedAmount(totalRaised);
-  }
+    if (totalRaised) {
+      setTotalRaisedAmount(totalRaised);
+    }
 
-  if (tokensSold) {
-    setTokensSoldAmount(tokensSold);
-  }
+    if (tokensSold) {
+      setTokensSoldAmount(tokensSold);
+    }
+
+  }, [percentageSold, totalRaised, tokensSold])
 
   return (
     <div className="flex flex-col items-center w-full space-y-2">

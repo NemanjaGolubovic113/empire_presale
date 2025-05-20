@@ -80,8 +80,7 @@ export const VisionSection = (): JSX.Element => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mt-8 md:mt-16">
-          {/* Feature cards */}
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mt-8 md:mt-16">
           {featureCards.map((card, index) => (
             <Card
               key={index}
@@ -115,7 +114,7 @@ export const VisionSection = (): JSX.Element => {
               </CardContent>
             </Card>
           ))}
-        </div>
+        </div> */}
       </div>
     </section>
   );
