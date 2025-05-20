@@ -5,7 +5,7 @@ import { PresaleSection } from "../PresaleSection";
 
 export const OverviewSection = (): JSX.Element => {
   return (
-    <div className="flex pt-40 relative items-center justify-center">
+    <div className="flex pt-0 lg:pt-30 relative items-center justify-center">
       {/* Background image with overlay */}
       <div className="absolute inset-0 bg-[url(..//section.png)] bg-cover bg-center" />
       <div className="absolute inset-0 bg-gradient-to-b from-[rgba(4,5,16,0.3)] to-[rgba(4,5,16,0.6)]" />
