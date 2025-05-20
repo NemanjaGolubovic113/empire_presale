@@ -24,6 +24,7 @@ export const HeaderSection = (): JSX.Element => {
     { label: "Leadership", href: "#leadership" },
     { label: "Future", href: "#future" },
     { label: "NFT", href: "https://emperorcoin.io/?page_id=379" },
+    { label: "Social", href: "https://emperorcoin.io/?page_id=1024" },
   ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
