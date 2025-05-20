@@ -75,10 +75,12 @@ export const MembershipSection = (): JSX.Element => {
           {/* Emperor Access Key Card */}
           <Card className="w-[365px] sm:w-[556px] border border-solid border-[#141625] shadow-[0px_0px_30px_#a3ff12] [background:linear-gradient(143deg,rgba(7,5,18,1)_0%,rgba(4,5,16,1)_100%)] rounded-xl relative">
             <CardContent className="p-8 flex flex-col items-center">
-              <div className="relative w-24 h-24 mb-12">
-                <div className="absolute w-24 h-24 top-0 left-0 bg-[#a3ff12] rounded-[48px] blur-[5px] opacity-75" />
-                <div className="flex w-20 h-20 items-center justify-center absolute top-2 left-2 bg-[#040510] rounded-[40px]">
-                  <CrownIcon className="text-[#a3ff12] w-10 h-10" />
+              <div className="relative w-32 h-32 mb-12">
+                <div className="absolute w-32 h-32 top-0 left-0 bg-[#a3ff12] rounded-full blur-[5px] opacity-75" />
+                <div className="flex w-28 h-28 items-center justify-center absolute top-2 left-2 bg-[#040510] rounded-full
+                ">
+                  {/* <CrownIcon className="text-[#a3ff12] w-10 h-10" /> */}
+                  <img src="/emperoraccesskey.png" alt="king" className="absolute rounded-full" />
                 </div>
               </div>
 
