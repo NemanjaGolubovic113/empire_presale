@@ -14,7 +14,7 @@ export const LeadershipSection = (): JSX.Element => {
   ];
 
   return (
-    <section className="w-full py-24 [background:linear-gradient(180deg,rgba(4,5,16,1)_0%,rgba(7,5,18,1)_100%)] relative">
+    <section className="w-full [background:linear-gradient(180deg,rgba(4,5,16,1)_0%,rgba(7,5,18,1)_100%)] relative">
       {/* Background decoration */}
       <div className="absolute inset-0 w-full opacity-10">
         <div className="relative w-full h-full">
