@@ -50,12 +50,12 @@ export const LeadershipSection = (): JSX.Element => {
           {founders.map((founder, index) => (
             <Card
               key={index}
-              className="w-[540px] h-[711px] rounded-xl overflow-hidden border border-solid border-[#141625] shadow-[0px_10px_30px_#00000080] [background:linear-gradient(120deg,rgba(7,5,18,1)_0%,rgba(4,5,16,1)_100%)]"
+              className="w-[540px] rounded-xl overflow-hidden border border-solid border-[#141625] shadow-[0px_10px_30px_#00000080] [background:linear-gradient(120deg,rgba(7,5,18,1)_0%,rgba(4,5,16,1)_100%)]"
             >
               <CardContent className="p-0 h-full relative">
-                <div className="relative w-full h-[550px]">
+                <div className="relative w-full h-[450px] md:h-[550px]">
                   <div
-                    className="w-full h-full bg-cover bg-center"
+                    className="w-full h-full bg-contain bg-center bg-repeat-x"
                     style={{ backgroundImage: `url(${founder.image})` }}
                   />
                   <div className="absolute w-full h-[275px] bottom-0 left-0 [background:linear-gradient(0deg,rgba(4,5,16,1)_0%,rgba(0,0,0,0)_100%)]" />
