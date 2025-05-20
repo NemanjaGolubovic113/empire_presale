@@ -478,9 +478,9 @@ export const PresaleSection = (): JSX.Element => {
                     /> */}
 
                     <div className="flex flex-col w-full space-y-2">
-                      <div className="flex justify-between w-full gap-3">
+                      <div className="flex justify-between w-full gap-3 items-end">
                         <div className="flex flex-col relative">
-                          <span className="text-gray-300">{payment.symbol} you pay</span>
+                          <span className="text-gray-300 mb-1">{payment.symbol} you pay</span>
                           <div className="flex-1 relative">
                             <input
                               type="number"
@@ -495,7 +495,7 @@ export const PresaleSection = (): JSX.Element => {
                         </div>
                         
                         <div className="flex flex-col relative">
-                          <span className="text-gray-300">IMPERIUM you receive</span>
+                          <span className="text-gray-300 mb-1">IMPERIUM you receive</span>
                           <div className="flex-1 relative">
                             <input
                               type="number"
