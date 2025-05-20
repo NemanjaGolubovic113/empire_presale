@@ -164,7 +164,7 @@ export const PresaleSection = (): JSX.Element => {
       case 'sol':
         return {
           symbol: 'SOL',
-          exchangeRate: 13.21 // 1 SOL = 13.21 $EMP
+          exchangeRate: 13.21 // 1 SOL = 13.21 $IMPERIUM
         };
       case 'usdt':
         return {
@@ -207,7 +207,7 @@ export const PresaleSection = (): JSX.Element => {
       return;
     }
 
-    const id = toast.loading(`Buying EMP...`);
+    const id = toast.loading(`Buying IMPERIUM...`);
     try {
       if (selectedPayment === 'sol') {
         let tx = new Transaction().add(await buySol(parseFloat(payAmount) * LAMPORTS_PER_SOL));
@@ -459,7 +459,7 @@ export const PresaleSection = (): JSX.Element => {
                     <TokenPrice 
                       currentPrice={currentPrice}
                       nextPrice={nextPrice}
-                      symbol="$EMP" 
+                      symbol="$IMPERIUM" 
                     />
                     
                     <PaymentOptions 
@@ -470,7 +470,7 @@ export const PresaleSection = (): JSX.Element => {
                     />
                     
                     {/* <TokenCalculator 
-                      tokenSymbol="$EMP" 
+                      tokenSymbol="$IMPERIUM" 
                       paymentSymbol={payment.symbol}
                       exchangeRate={payment.exchangeRate}
                       paymentIcon='/sol.png'
@@ -495,7 +495,7 @@ export const PresaleSection = (): JSX.Element => {
                         </div>
                         
                         <div className="flex flex-col relative">
-                          <span className="text-gray-300">EMP you receive</span>
+                          <span className="text-gray-300">IMPERIUM you receive</span>
                           <div className="flex-1 relative">
                             <input
                               type="number"
@@ -521,7 +521,7 @@ export const PresaleSection = (): JSX.Element => {
                 )}
                 
                 <div className="text-white">
-                  Your Token Amount: {buyTokenAmount.toFixed(3)} EMP
+                  Your Token Amount: {buyTokenAmount.toFixed(3)} IMPERIUM
                 </div>
 
                 {walletCtx?.publicKey.toBase58() === adminAddress && (

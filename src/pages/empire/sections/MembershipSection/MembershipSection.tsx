@@ -12,7 +12,6 @@ import { Card, CardContent } from "../../../../components/ui/card";
 export const MembershipSection = (): JSX.Element => {
   // Benefits data for mapping
   const eliteBenefits = [
-    "Free access to 1,700+ airport lounges worldwide",
     "Fully paid invites to global meetups — starting in Dubai",
     "Voting power on major project decisions",
     "Priority access to all future launches and drops",

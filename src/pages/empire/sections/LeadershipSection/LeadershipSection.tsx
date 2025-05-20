@@ -5,14 +5,10 @@ export const LeadershipSection = (): JSX.Element => {
   const founders = [
     {
       name: "@Thee7mod",
-      role: "Visionary & Strategist",
-      bio: "Former hedge fund manager with 10+ years in traditional finance before pivoting to crypto in 2016.",
       image: "/alexander-crown.png",
     },
     {
       name: "@Cryptomilad_",
-      role: "Technical Architect",
-      bio: "Blockchain developer since 2015. Contributed to multiple top 50 cryptocurrency projects.",
       image: "/marcus-imperium.png",
     },
   ];
@@ -69,12 +65,6 @@ export const LeadershipSection = (): JSX.Element => {
                   <h3 className="[font-family:'Arial-Bold',Helvetica] font-bold text-white text-xl leading-6">
                     {founder.name}
                   </h3>
-                  <p className="mt-2 [font-family:'Arial-Narrow',Helvetica] font-normal text-[#a3ff12] text-sm leading-[22.4px]">
-                    {founder.role}
-                  </p>
-                  <p className="mt-4 [font-family:'Arial-Narrow',Helvetica] font-normal text-gray-400 text-sm leading-[22.4px]">
-                    {founder.bio}
-                  </p>
                 </div>
               </CardContent>
             </Card>

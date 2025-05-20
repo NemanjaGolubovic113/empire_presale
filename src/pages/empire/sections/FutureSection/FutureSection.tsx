@@ -19,9 +19,7 @@ export const FutureSection = (): JSX.Element => {
         </h2>
 
         <p className="mt-4 md:mt-6 max-w-[742px] [font-family:'Arial-Narrow',Helvetica] font-normal text-gray-300 text-lg md:text-xl text-center tracking-[0] leading-relaxed md:leading-8">
-          Be part of something bigger than just another crypto project. Join a movement that&#39;s
-          <br className="hidden md:block" />
-          redefining the future of decentralized finance.
+          Be part of something bigger than just another crypto project. Join a movement that&#39;s redefining the future of decentralized finance.
         </p>
 
         <a href="https://x.com/i/communities/1920263056564891865" target="_blank">

@@ -23,6 +23,7 @@ export const HeaderSection = (): JSX.Element => {
     // { label: "Presale", href: "#presale" },
     { label: "Leadership", href: "#leadership" },
     { label: "Future", href: "#future" },
+    { label: "NFT", href: "https://emperorcoin.io/?page_id=379" },
   ];
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -47,10 +48,32 @@ export const HeaderSection = (): JSX.Element => {
         {/* Logo */}
         <div className="flex items-center gap-2">
           <div className="text-[#a3ff12] text-xl md:text-2xl leading-6 [font-family:'Font_Awesome_5_Free-Solid',Helvetica] font-normal">
-            <img src="/king.svg" alt="king" height={24} width={24} />
+            <img src="/emperorcoin .webp" alt="king" height={64} width={64} />
           </div>
-          <div className="[font-family:'Arial-Bold',Helvetica] font-bold text-white text-lg md:text-xl leading-8">
-            The Empire
+          {/* Mobile Menu */}
+          <div className="md:hidden">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-white">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[300px] bg-[#040510] border-l border-[#141625]">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <nav className="flex flex-col gap-4 mt-8">
+                  {navigationItems.map((item, index) => (
+                    <a
+                      key={index}
+                      href={item.href}
+                      onClick={(e) => handleNavClick(e, item.href)}
+                      className="text-gray-300 hover:text-white px-4 py-2 text-lg cursor-pointer"
+                    >
+                      {item.label}
+                    </a>
+                  ))}
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
 
@@ -61,7 +84,13 @@ export const HeaderSection = (): JSX.Element => {
               <NavigationMenuItem key={index}>
                 <NavigationMenuLink
                   href={item.href}
-                  onClick={(e) => handleNavClick(e, item.href)}
+                  onClick={
+                    item.href.startsWith("#")
+                      ? (e) => handleNavClick(e, item.href)
+                      : undefined
+                  }
+                  target={item.href.startsWith("http") ? "_blank" : undefined}
+                  rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
                   className="[font-family:'Arial-Narrow',Helvetica] font-normal text-gray-300 hover:text-white text-base leading-[25.6px] cursor-pointer"
                 >
                   {item.label}
@@ -71,31 +100,7 @@ export const HeaderSection = (): JSX.Element => {
           </NavigationMenuList>
         </NavigationMenu>
 
-        {/* Mobile Menu */}
-        <div className="md:hidden">
-          <Sheet open={isOpen} onOpenChange={setIsOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-white">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] bg-[#040510] border-l border-[#141625]">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-              <nav className="flex flex-col gap-4 mt-8">
-                {navigationItems.map((item, index) => (
-                  <a
-                    key={index}
-                    href={item.href}
-                    onClick={(e) => handleNavClick(e, item.href)}
-                    className="text-gray-300 hover:text-white px-4 py-2 text-lg cursor-pointer"
-                  >
-                    {item.label}
-                  </a>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
-        </div>
+        
 
         {mounted && <WalletMultiButton style={{backgroundColor: 'transparent'}} />}
         {/* Connect Wallet Button */}

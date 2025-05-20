@@ -14,7 +14,7 @@ export const OverviewSection = (): JSX.Element => {
         <Card className="relative max-w-[800px] border-none bg-transparent">
           <CardContent className="flex flex-col items-center justify-center p-0">
             <div className="w-[72px] h-16 text-[#a3ff12] text-[64px] text-center leading-[64px] font-normal tracking-[0] whitespace-nowrap mb-11">
-              <img src="/king.svg" alt="king" />
+              <img src="/emperorcoin .webp" alt="king" />
             </div>
 
             <h1
