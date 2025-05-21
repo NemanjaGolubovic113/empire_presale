@@ -38,7 +38,7 @@ export const FooterSection = (): JSX.Element => {
 
         <div className="pt-6 border-t border-[#141625] w-full flex justify-center">
           <p className="text-gray-500 text-xs md:text-sm font-['Arial-Narrow',Helvetica] text-center">
-            © All rights reserved.
+            © 2025 Emperor coin. All rights reserved.
           </p>
         </div>
       </div>

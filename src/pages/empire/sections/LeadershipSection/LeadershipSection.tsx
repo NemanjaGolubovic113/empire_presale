@@ -4,14 +4,18 @@ import { Card, CardContent } from "../../../../components/ui/card";
 export const LeadershipSection = (): JSX.Element => {
   const founders = [
     {
-      name: "@thee7mod(X put link ) Co-Founder",
-      bio: "A strategic force behind the scenes, T7 complements the team with strong expertise in community building, project coordination, and early-stage venture support. As co-founder, T7 plays a key role in growth, partnerships, and ensuring the project stays grounded in its mission.",
-      image: "/alexander-crown.png",
-    },
-    {
-      name: "Milad – Founder (@cryptomilad_)",
+      name: "Founder",
+      x: "(@cryptomilad_)",
+      xlink: "https://",
       bio: "A seasoned crypto trader since 2014, Milad brings over a decade of experience in trading and market strategy. His deep understanding of market cycles, risk management, and blockchain innovation drives the vision of the project forward.",
       image: "/marcus-imperium.png",
+    },
+    {
+      name: "Co-Founder",
+      x: "(@thee7mod)",
+      xlink: "https://",
+      bio: "A strategic force behind the scenes, T7 complements the team with strong expertise in community building, project coordination, and early-stage venture support. As co-founder, T7 plays a key role in growth, partnerships, and ensuring the project stays grounded in its mission.",
+      image: "/alexander-crown.png",
     },
   ];
 
@@ -57,15 +61,18 @@ export const LeadershipSection = (): JSX.Element => {
               <CardContent className="p-0 h-full relative">
                 <div className="relative w-full h-[450px] md:h-[550px]">
                   <div
-                    className="w-full h-full bg-contain bg-center bg-repeat-x"
+                    className="w-full h-full bg-contain bg-center bg-no-repeat"
                     style={{ backgroundImage: `url(${founder.image})` }}
                   />
                   <div className="absolute w-full h-[275px] bottom-0 left-0 [background:linear-gradient(0deg,rgba(4,5,16,1)_0%,rgba(0,0,0,0)_100%)]" />
                 </div>
 
-                <div className="p-6">
-                  <h3 className="[font-family:'Arial-Bold',Helvetica] font-bold text-white text-xl leading-6">
-                    {founder.name}
+                <div className="px-6">
+                  <h3 className="flex [font-family:'Arial-Bold',Helvetica] font-bold text-white text-xl leading-6">
+                    <>
+                      {founder.name}
+                    </>
+                    <a href={founder.xlink} target="_blank" className="ml-1">{founder.x}</a>
                   </h3>
                   <p className="mt-4 [font-family:'Arial-Narrow',Helvetica] font-normal text-gray-400 text-sm leading-[22.4px]">
                     {founder.bio}
