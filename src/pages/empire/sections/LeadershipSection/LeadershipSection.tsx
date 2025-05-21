@@ -6,14 +6,14 @@ export const LeadershipSection = (): JSX.Element => {
     {
       name: "Founder",
       x: "(@cryptomilad_)",
-      xlink: "https://",
+      xlink: "https://x.com/cryptomilad_?s=09",
       bio: "A seasoned crypto trader since 2014, Milad brings over a decade of experience in trading and market strategy. His deep understanding of market cycles, risk management, and blockchain innovation drives the vision of the project forward.",
       image: "/marcus-imperium.png",
     },
     {
       name: "Co-Founder",
       x: "(@thee7mod)",
-      xlink: "https://",
+      xlink: "https://x.com/Thee7mod?s=09",
       bio: "A strategic force behind the scenes, T7 complements the team with strong expertise in community building, project coordination, and early-stage venture support. As co-founder, T7 plays a key role in growth, partnerships, and ensuring the project stays grounded in its mission.",
       image: "/alexander-crown.png",
     },
