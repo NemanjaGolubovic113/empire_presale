@@ -4,11 +4,13 @@ import { Card, CardContent } from "../../../../components/ui/card";
 export const LeadershipSection = (): JSX.Element => {
   const founders = [
     {
-      name: "@Thee7mod",
+      name: "@thee7mod(X put link ) Co-Founder",
+      bio: "A strategic force behind the scenes, T7 complements the team with strong expertise in community building, project coordination, and early-stage venture support. As co-founder, T7 plays a key role in growth, partnerships, and ensuring the project stays grounded in its mission.",
       image: "/alexander-crown.png",
     },
     {
-      name: "@Cryptomilad_",
+      name: "Milad – Founder (@cryptomilad_)",
+      bio: "A seasoned crypto trader since 2014, Milad brings over a decade of experience in trading and market strategy. His deep understanding of market cycles, risk management, and blockchain innovation drives the vision of the project forward.",
       image: "/marcus-imperium.png",
     },
   ];
@@ -65,7 +67,11 @@ export const LeadershipSection = (): JSX.Element => {
                   <h3 className="[font-family:'Arial-Bold',Helvetica] font-bold text-white text-xl leading-6">
                     {founder.name}
                   </h3>
+                  <p className="mt-4 [font-family:'Arial-Narrow',Helvetica] font-normal text-gray-400 text-sm leading-[22.4px]">
+                    {founder.bio}
+                  </p>
                 </div>
+                
               </CardContent>
             </Card>
           ))}
