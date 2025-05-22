@@ -6,7 +6,7 @@ import {
     SolflareWalletAdapter,
     TorusWalletAdapter,
     LedgerWalletAdapter,
-    WalletConnectWalletAdapter,
+    TrustWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 import {
     WalletModalProvider,
@@ -25,6 +25,7 @@ export const WalletProviders: FC<{ children: React.ReactNode }> = ({ children })
     const wallets = useMemo(
         () => [
             new PhantomWalletAdapter(),
+            new TrustWalletAdapter(),
             new SolflareWalletAdapter({ network }),
             new TorusWalletAdapter(),
             new LedgerWalletAdapter(),
