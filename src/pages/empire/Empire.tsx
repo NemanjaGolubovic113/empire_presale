@@ -11,6 +11,7 @@ import { FutureSection } from "./sections/FutureSection";
 import { MembershipSection } from "./sections/MembershipSection";
 import { PresaleSection } from "./sections/PresaleSection";
 import { AdminSection } from "./sections/AdminSection";
+import { RoadmapSection } from "./sections/RoadmapSection";
 
 export const Empire = (): JSX.Element => {
   const walletCtx = useAnchorWallet();
@@ -60,6 +61,10 @@ export const Empire = (): JSX.Element => {
         {/* <section id="presale">
           <PresaleSection />
         </section> */}
+
+        <section id="roadmap">
+          <RoadmapSection />
+        </section>
 
         <section id="leadership">
           <LeadershipSection />

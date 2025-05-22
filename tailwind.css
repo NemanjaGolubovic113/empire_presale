@@ -118,3 +118,25 @@
     0 0 10px rgba(255, 255, 255, 0.5),
     0 0 14px rgba(255, 255, 255, 0.3);
 }
+
+.content-list {
+  margin-bottom: 15px;
+  list-style: none;
+}
+
+.content-list li {
+  margin-bottom: 15px;
+  position: relative;
+  color: #a3ff12;
+}
+
+/* .content-list li:before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 10px;
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  background: #a3ff12;
+} */
