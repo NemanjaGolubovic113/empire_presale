@@ -22,7 +22,7 @@ export const Empire = (): JSX.Element => {
   const repeatedText = `${scrollingText} • ${scrollingText} •`;
 
   return (
-    <div className="flex flex-col w-full items-start relative">
+    <div className="flex flex-col w-full items-start relative [background:linear-gradient(180deg,rgba(4,5,16,1)_0%,rgba(7,5,18,1)_100%)]">
       <HeaderSection />
 
       <div className="relative w-full">

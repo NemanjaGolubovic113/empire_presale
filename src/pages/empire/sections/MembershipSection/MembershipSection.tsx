@@ -32,7 +32,7 @@ export const MembershipSection = (): JSX.Element => {
   ];
 
   return (
-    <section className="flex flex-col items-center py-24 w-full [background:linear-gradient(180deg,rgba(4,5,16,1)_0%,rgba(7,5,18,1)_100%)]">
+    <section className="flex flex-col items-center py-24 w-full">
       <div className="relative max-w-[1200px] w-full">
         <h2
           className="w-80 mx-auto [background:linear-gradient(90deg,rgba(163,255,18,1)_0%,rgba(197,255,107,1)_100%)] [-webkit-background-clip:text] bg-clip-text [-webkit-text-fill-color:transparent] [text-fill-color:transparent] [font-family:'Arial-Bold',Helvetica] font-bold text-transparent text-[40px] text-center tracking-[0] leading-[48px] whitespace-nowrap"
