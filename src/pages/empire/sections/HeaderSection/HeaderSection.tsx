@@ -23,6 +23,7 @@ export const HeaderSection = (): JSX.Element => {
     // { label: "Presale", href: "#presale" },
     { label: "Leadership", href: "#leadership" },
     { label: "Roadmap", href: "#roadmap" },
+    { label: "Tokenmics", href: "#tokenomics" },
     { label: "Future", href: "#future" },
     { label: "NFT", href: "https://emperorcoin.io/?page_id=379" },
     { label: "Social", href: "https://emperorcoin.io/?page_id=1024" },

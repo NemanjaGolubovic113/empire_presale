@@ -20,9 +20,9 @@ export const LeadershipSection = (): JSX.Element => {
   ];
 
   return (
-    <section className="w-full relative">
+    <section className="w-full relative pt-24">
       {/* Background decoration */}
-      <div className="absolute inset-0 w-full opacity-10">
+      {/* <div className="absolute inset-0 w-full opacity-10">
         <div className="relative w-full h-full">
           <img
             className="absolute w-5 h-5 top-0 left-0"
@@ -30,7 +30,7 @@ export const LeadershipSection = (): JSX.Element => {
             src="/component-3.svg"
           />
         </div>
-      </div>
+      </div> */}
 
       <div className="relative mx-auto max-w-[1200px] w-full">
         {/* Section header */}
