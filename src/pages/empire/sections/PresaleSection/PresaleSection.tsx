@@ -431,7 +431,7 @@ export const PresaleSection = (): JSX.Element => {
 
 
   return (
-    <section className="flex flex-col items-center py-24 w-full">
+    <section className="flex flex-col items-center pb-24 w-full">
       <div className="relative max-w-[1200px] w-full">
         <div className="flex flex-wrap justify-center gap-8 mt-16">
           {/* Emperor Access Key Card */}
